@@ -4,7 +4,6 @@ from keras.callbacks import ModelCheckpoint, TensorBoard
 
 
 def train_model(net, data, optimizer='rmsprop', loss='categorical_crossentropy'):
-
     tb = TensorBoard(log_dir='./Graph', histogram_freq=0, write_graph=True, write_images=True)
 
     net.compile(optimizer=optimizer, loss=loss)
@@ -16,6 +15,7 @@ def train_model(net, data, optimizer='rmsprop', loss='categorical_crossentropy')
 
     net.save_weights("./weights/weights_model_1")
 
+
 def random_predict(net, data):
     net.compile(optimizer='rmsprop', loss='catergorical_crossentropy')
 
@@ -25,10 +25,15 @@ def random_predict(net, data):
 
 
 if __name__ == "__main__":
-    data = Data(im_length=64, im_height=64 ,nb_data=1000)
+    root = "/Users/charles/Data/Hamelin/"
+    images_test_dir = root + "TST/test/"
+    labels_test_txt = root + "test.txt"
+
+    data = Data(images_test_dir, labels_test_txt)
+
     net = attention_network_1(data)
     print(net.summary())
 
-    train_model(net, data)
+    #train_model(net, data)
 
     print("fin")

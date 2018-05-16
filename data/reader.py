@@ -56,15 +56,15 @@ def get_labels_dict(labels_txt):
     return labels_dict
 
 
-def pad_images(images, im_length, im_height):
+def pad_images(images, im_height, im_length):
     padded_images = []
     for image in images:
-        padded_image = np.zeros([im_length, im_height])
+        padded_image = np.zeros([im_height, im_length])
         for i in range(image.shape[0]):
             for j in range(image.shape[1]):
                 padded_image[i, j] = image[i, j]
 
-        padded_images.append(padded_image)
+        padded_images.append(np.rot90(padded_image, k=-1))
 
     return padded_images
 
@@ -78,8 +78,22 @@ class Data:
         self.images_path = np.array(os.listdir(images_dir_path))
         self.labels_dict = get_labels_dict(labels_txt_path)
 
-        self.im_length = 384
         self.im_height = 28
+        self.im_length = 384
+
+    def generate(self, batch_size):
+        instance_id = range(len(self.images_path))
+        batch_ids = random.sample(instance_id, batch_size)  # list of random ids
+
+        variable_size_images_batch = [mpimg.imread(  # images to be padded
+            self.image_dir_path + self.images_path[id_])
+            for id_ in batch_ids]
+        images_batch = pad_images(variable_size_images_batch, self.im_length, self.im_height)
+
+        labels_batch = [self.labels_dict[image_path]
+                        for image_path in self.images_path[batch_ids]]
+
+        return images_batch, labels_batch
 
     def generator(self, batch_size):
         instance_id = range(len(self.images_path))
@@ -87,11 +101,12 @@ class Data:
             try:
                 batch_ids = random.sample(instance_id, batch_size)  # list of random ids
 
-                variable_size_images_batch = [mpimg.imread(  # images to be padded
+                variable_size_images_batch_list = [mpimg.imread(  # images to be padded
                     self.image_dir_path + self.images_path[id_])
                     for id_ in batch_ids]
+                images_batch_list = pad_images(variable_size_images_batch_list, self.im_height, self.im_length)
 
-                images_batch = pad_images(variable_size_images_batch, self.im_length, self.im_height)
+                images_batch = np.array(images_batch_list).reshape(batch_size, self.im_length, self.im_height, 1)
 
                 labels_batch = [self.labels_dict[image_path]
                                 for image_path in self.images_path[batch_ids]]
@@ -103,7 +118,7 @@ class Data:
                 yield None, None
 
 
-if __name__ == "__main__":
+def test_generator():
     root = "/Users/charles/Data/Hamelin/"
     images_test_dir = root + "TST/test/"
     labels_test_txt = root + "test.txt"
@@ -114,7 +129,11 @@ if __name__ == "__main__":
     a = gen.__next__()
     images = a[0]
 
-    plt.imshow(images[0])
+    plt.imshow(images[0, :, :, 0])
     plt.show()
+
+
+if __name__ == "__main__":
+    test_generator()
 
     print('fin')

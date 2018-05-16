@@ -16,8 +16,8 @@ def train_model(net, data, optimizer='rmsprop', loss='categorical_crossentropy')
     net.save_weights("./weights/weights_model_1")
 
 
-def random_predict(net, data):
-    net.compile(optimizer='rmsprop', loss='catergorical_crossentropy')
+def predict(net, data):
+    #net.compile(optimizer='rmsprop', loss='catergorical_crossentropy')
 
     input = data.generator(2).__next__()[0]
 
@@ -34,6 +34,6 @@ if __name__ == "__main__":
     net = attention_network_1(data)
     print(net.summary())
 
-    #train_model(net, data)
+    predict(net, data)
 
     print("fin")

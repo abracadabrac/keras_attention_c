@@ -9,8 +9,8 @@ def train_model(net, data, optimizer='rmsprop', loss='categorical_crossentropy')
     net.compile(optimizer=optimizer, loss=loss)
 
     net.fit_generator(data.generator(4),
-                      epochs=1,
-                      steps_per_epoch=300,
+                      epochs=10,
+                      steps_per_epoch=4453,
                       callbacks=[tb])
 
     net.save_weights("./weights/weights_model_1")
@@ -25,6 +25,7 @@ def predict(net, data):
 
 
 if __name__ == "__main__":
+
     root = "/Users/charles/Data/Hamelin/"
     images_test_dir = root + "TST/test/"
     labels_test_txt = root + "test.txt"
@@ -32,8 +33,7 @@ if __name__ == "__main__":
     data = Data(images_test_dir, labels_test_txt)
 
     net = attention_network_1(data)
-    print(net.summary())
 
-    predict(net, data)
+    train_model(net, data)
 
     print("fin")

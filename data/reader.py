@@ -52,6 +52,7 @@ def get_labels_dict(labels_txt_path):
 def pred2OneHot(probability_vector):
     """
     Neural nets predict vectors of probability for each element of the sequence over the vocabulary.
+    this function permits to get the most likely label according to the net's prediction
 
     :param probability_vector:
     :return: most likely encoded chars
@@ -67,13 +68,13 @@ class Data:
 
         self.im_height = 28
         self.im_length = 384
-        self.lb_length = 28  # normalized length of the encoded elements of the labels
+        self.lb_length = 16  # normalized length of the encoded elements of the labels
         self.image_dir_path = images_dir_path
         self.labels_txt_path = labels_txt_path
 
         self.labels_dict = get_labels_dict(labels_txt_path)
-        self.encoding_dict = np.load('../data/encoding_dict.npy').item()
-        self.decoding_dict = np.load('../data/decoding_dict.npy').item()
+        self.encoding_dict = np.load('/Users/charles/Workspace/text_attention/data/encoding_dict_Hamelin.npy').item()
+        self.decoding_dict = np.load('/Users/charles/Workspace/text_attention/data/decoding_dict_Hamelin.npy').item()
 
         self.images_path = np.array(os.listdir(images_dir_path))
 
@@ -105,6 +106,13 @@ class Data:
                 yield None, None
 
     def encode_label(self, labels):
+        """
+        :param labels: list of strings of variable length.
+        :return: np.array representing a sequence of encoded elements.
+        the sequences are completed with zero vectors.
+
+        encoded_labels.shape = (batch_size, self.lb_length, self.vocab_size)
+        """
         encoded_labels = []
         for label in labels:
             encoded_label = []
@@ -118,12 +126,18 @@ class Data:
         return encoded_labels
 
     def decode_labels(self, labels):
+        """
+        :param labels: np.array of list representing a sequence of encoded labels.
+        :return: the corresponding list of strings padded with "_" for null elements
+        """
         decoded_labels = []
         for label in labels:
             decoded_label = ''
             for e in label:
                 if np.sum(e) == 1:
                     decoded_label += self.decoding_dict[list(e).index(1.)]
+                else:
+                    decoded_label += "_"
             decoded_labels.append(decoded_label)
         return decoded_labels
 
@@ -139,6 +153,8 @@ def main1():
     images, labels = gen.__next__()
 
     decoded_labels = data.decode_labels(labels)
+
+    print(decoded_labels)
 
 
 if __name__ == "__main__":

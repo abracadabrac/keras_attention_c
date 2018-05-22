@@ -2,6 +2,8 @@ from models.ANN import attention_network_1
 from data.reader import Data
 from keras.callbacks import ModelCheckpoint, TensorBoard
 from keras.optimizers import Adam
+from keras.models import model_from_json
+import numpy as np
 import os
 
 
@@ -14,7 +16,7 @@ def train_model(net, data, name,
 
     mkexpdir(name)            # make experiment directory
 
-    tb = TensorBoard(log_dir='./experiments/' + name + 'TensorBoard/', histogram_freq=0, write_graph=True, write_images=True)
+    tb = TensorBoard(log_dir='./experiments/' + name + '/TensorBoard/', histogram_freq=0, write_graph=True, write_images=True)
 
     net.compile(optimizer=optimizer, loss=loss)
 
@@ -23,35 +25,55 @@ def train_model(net, data, name,
                       steps_per_epoch=steps_per_epoch,
                       callbacks=[tb])
 
-    save_experiment(net, name)
+    save_experiment(net, name, optimizer, loss, epoch, steps_per_epoch)
 
 
 def mkexpdir(name):
-    files = os.listdir("./experiments")
     try:
-        assert name not in files
-    except AssertionError:
+        os.makedirs("./experiments/" + name)
+    except FileExistsError:
         print('Warning : experiment name %s already used' %name)
 
-    os.makedirs("./experiments/" + name)
 
-
-def save_experiment(net, name):
+def save_experiment(net, name, optimizer, loss, epoch, steps_per_epoch):
     d = "./experiments/" + name
 
-    with open(d + "model.json", "w") as json_file:
-        json_file.write(net.to_json())
+    meta_parameters = {'optimizer': optimizer,
+                       'loss': loss,
+                       'epoch': epoch,
+                       'steps_per_epoch': steps_per_epoch}
+    np.save(d + '/meta_parameters', meta_parameters)
 
-    with open(d + 'summary.txt', 'w') as fh:
-        net.summary(print_fn=lambda x: fh.write(x + '\n'))
+    with open(d + "/model.json", "w") as f:
+        f.write(net.to_json())
+
+    with open(d + '/architecture_summary.txt', 'w') as f:
+        net.summary(print_fn=lambda x: f.write(x + '\n'))
 
     net.save_weights(d + '/weights.h5')
 
 
+
+
+def load_xp_model(name):
+    """
+    :param name: name of the experiment
+    :return: the network fully trained after the last epoch
+    """
+    d = 'experiments/' + name
+
+    file = open(d + '/model.json', 'r')
+    net_json = file.read()
+    file.close()
+
+    net = model_from_json(net_json)
+
+    net.load_weights(d + "/weights.h5")
+
 # __________________________________________________ #
 
-def predict(net, data, weights_hdf5=None):
-    images, labels = data.generator(50).__next__()
+def predict(net, data, nb_pred=50):
+    images, labels = data.generator(nb_pred).__next__()
 
     return net.predict(images)
 
@@ -89,7 +111,7 @@ def main_train():
     print('fin train')
 
 
-def main_evaluate():
+def main_predict():
     name = ' '
     root = "/Users/charles/Data/Hamelin/"
     images_test_dir = root + "TST/test/"
@@ -99,7 +121,13 @@ def main_evaluate():
     data = Data(images_test_dir, labels_test_txt)
     net = attention_network_1(data)
 
-    y = predict(net, data, weights_hdf5=weights_hdf5)
+    nb_data = len(data.labels_txt_path)
+
+    y = predict(net, data,
+                weights_hdf5=weights_hdf5,
+                batch_size=4,
+                epoch=100,
+                steps_per_epoch=nb_data)
 
     print('fin evaluate')
 

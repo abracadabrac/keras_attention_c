@@ -149,7 +149,7 @@ def main1():
 
     data = Data(images_test_dir, labels_test_txt)
 
-    gen = data.generator(3)
+    gen = data.generator(12)
     images, labels = gen.__next__()
 
     decoded_labels = data.decode_labels(labels)

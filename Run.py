@@ -1,9 +1,10 @@
 from models.ANN import attention_network_1
 from data.reader import Data
-from keras.callbacks import ModelCheckpoint, TensorBoard
+
+from keras.callbacks import TensorBoard
 from keras.optimizers import Adam
 from keras.models import model_from_json
-import numpy as np
+
 import json
 import os
 
@@ -105,21 +106,23 @@ def evaluate_model(name, data_test):
 
 def main_train():
     name = 'xp_1'     # in all the file 'name' implicitly refers to the name of an experiment
-    root = "/Users/charles/Data/Hamelin/"
+    root = "/Users/charles/Data/Hamelin/"       # dir containing TRAIN, TST and VAL
     images_train_dir = root + "TRAIN/train/"
     labels_train_txt = root + "train.txt"
 
     data = Data(images_train_dir, labels_train_txt)
     net = attention_network_1(data)
 
+    nb_data = len(data.labels_dict)     # total number of hand-written images in the train data-set
+
     train_model(net, data, name,
                 learning_rate=0.001,
                 loss='mean_squared_error',
-                batch_size=1,
-                epoch=1,
-                steps_per_epoch=1)
+                batch_size=8,
+                epoch=50,
+                steps_per_epoch=nb_data)
 
-    print('fin train')
+    print('###----> training end <-----###')
 
 
 def main_predict():

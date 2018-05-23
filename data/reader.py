@@ -99,11 +99,15 @@ class Data:
 
                 labels_batch = self.encode_label(variable_size_words_batch_list)  # encode and normalize size
 
+                assert (images_batch.shape == (batch_size, self.im_length, self.im_height, 1)) & \
+                       (labels_batch.shape == (batch_size, self.lb_length, self.vocab_size))
+
                 yield (images_batch, labels_batch)
             except Exception as e:
-                print('EXCEPTION OMG')
+                print(" ")
+                print('OULALA !!')
                 print(e)
-                yield None, None
+                self.generator(batch_size)
 
     def encode_label(self, labels):
         """
@@ -113,15 +117,12 @@ class Data:
 
         encoded_labels.shape = (batch_size, self.lb_length, self.vocab_size)
         """
-        encoded_labels = []
-        for label in labels:
-            encoded_label = []
-            for char in label:
-                encoded_label.append(self.encoding_dict[char])
-            encoded_labels.append(encoded_label)
+        variable_size_encoded_labels_list = [[self.encoding_dict[char]
+                                              for char in label] for label in labels]
 
         encoded_labels = np.array(
-            [xi + [list(np.zeros(self.vocab_size))] * (self.lb_length - len(xi)) for xi in encoded_labels])
+            [xi + [list(np.zeros(self.vocab_size))] * (self.lb_length - len(xi))
+             for xi in variable_size_encoded_labels_list])
 
         return encoded_labels
 

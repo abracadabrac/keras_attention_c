@@ -119,7 +119,7 @@ def main_train():
                 learning_rate=0.001,
                 loss='mean_squared_error',
                 batch_size=8,
-                epoch=50,
+                epoch=6,
                 steps_per_epoch=nb_data)
 
     print('###----> training end <-----###')

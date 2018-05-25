@@ -197,7 +197,7 @@ class AttentionDecoder(Recurrent):
         self.built = True
 
     def call(self, x):
-        # store the whole sequence so we can "attend" to it at each timestep
+        # store the whole sequence so we can "attend" to it at each time-step
         self.x_seq = x
 
         # apply the a dense layer over the time dimension of the sequence
@@ -208,7 +208,7 @@ class AttentionDecoder(Recurrent):
                                              timesteps=self.timesteps,
                                              output_dim=self.units)
 
-        return super(AttentionDecoder, self).call(x)
+        return super(AttentionDecoder, self).call(x)        # ??
 
     def get_initial_state(self, inputs):
         print('inputs shape:', inputs.get_shape())

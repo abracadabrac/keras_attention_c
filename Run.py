@@ -105,7 +105,7 @@ def evaluate_model(name, data_test):
 
 
 def main_train():
-    name = 'xp_1'     # in all the file 'name' implicitly refers to the name of an experiment
+    name = 'xp_0'     # in all the file 'name' implicitly refers to the name of an experiment
     root = "/Users/charles/Data/Hamelin/"       # dir containing TRAIN, TST and VAL
     images_train_dir = root + "TRAIN/train/"
     labels_train_txt = root + "train.txt"
@@ -118,9 +118,9 @@ def main_train():
     train_model(net, data, name,
                 learning_rate=0.001,
                 loss='mean_squared_error',
-                batch_size=8,
-                epoch=6,
-                steps_per_epoch=nb_data)
+                batch_size=1,
+                epoch=1,
+                steps_per_epoch=1)
 
     print('###----> training end <-----###')
 

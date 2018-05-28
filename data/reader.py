@@ -73,8 +73,8 @@ class Data:
         self.labels_txt_path = labels_txt_path
 
         self.labels_dict = get_labels_dict(labels_txt_path)
-        self.encoding_dict = np.load('/Users/charles/Workspace/text_attention/data/encoding_dict_Hamelin.npy').item()
-        self.decoding_dict = np.load('/Users/charles/Workspace/text_attention/data/decoding_dict_Hamelin.npy').item()
+        self.encoding_dict = np.load('/home/abrecadabrac/Template/keras_attention_text/data/encoding_dict_Hamelin.npy').item()
+        self.decoding_dict = np.load('/home/abrecadabrac/Template/keras_attention_text/data/decoding_dict_Hamelin.npy').item()
 
         self.images_path = np.array(os.listdir(images_dir_path))
 
@@ -144,7 +144,7 @@ class Data:
 
 
 def main1():
-    root = "/Users/charles/Data/Hamelin/"
+    root = "/home/abrecadabrac/Template/data/Hamelin_full/"
     images_test_dir = root + "TST/test/"
     labels_test_txt = root + "test.txt"
 

@@ -1,40 +1,48 @@
 from models.ANN import attention_network_1
-from data.reader import Data
+from data.reader import Data, pred2OneHot
 
-from keras.callbacks import TensorBoard
+from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.optimizers import Adam
 from keras.models import model_from_json
+
+import models
 
 import json
 import os
 
 
 def train_model(net, data, name,
+                validation_data,
                 learning_rate=0.001,
                 loss='mean_squared_error',
                 batch_size=1,
                 epoch=1,
                 steps_per_epoch=1):
 
-    mkexpdir(name)            # make experiment directory
-
     tb = TensorBoard(log_dir='./experiments/' + name + '/TensorBoard/', histogram_freq=0, write_graph=True, write_images=True)
+    cp = ModelCheckpoint(filepath="./experiments/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5')
 
     net.compile(optimizer=Adam(lr=learning_rate), loss=loss)
 
     net.fit_generator(data.generator(batch_size),
                       epochs=epoch,
+                      validation_data=validation_data,
                       steps_per_epoch=steps_per_epoch,
-                      callbacks=[tb])
+                      callbacks=[tb, cp])
 
     save_experiment(net, name, learning_rate, loss, epoch, steps_per_epoch)
 
 
-def mkexpdir(name):
-    try:
-        os.makedirs("./experiments/" + name)
-    except FileExistsError:
-        print('Warning : experiment name %s already used' %name)
+def mkexpdir():
+    while True:
+        try:
+            name = input("Enter an experiement name: ")
+            os.makedirs("./experiments/" + name + '/weights/')
+            break
+        except FileExistsError:
+            print('Warning : experiment name %s already used' %name)
+
+    return name
 
 
 def save_experiment(net, name, learning_rate, loss, epoch, steps_per_epoch):
@@ -66,9 +74,10 @@ def load_xp_model(name):
     file = open(d + '/model.json', 'r')
     net_json = file.read()
     file.close()
-    net = model_from_json(net_json)
+    net = model_from_json(net_json,
+                     custom_objects={'AttentionDecoder': models.custom_recurrents.AttentionDecoder})
 
-    with open('meta_parameters.json', 'r') as f:
+    with open(d + '/meta_parameters.json', 'r') as f:
         meta_parameters = json.load(f)
     learning_rate = meta_parameters['learning_rate']
     loss = meta_parameters['loss']
@@ -105,38 +114,50 @@ def evaluate_model(name, data_test):
 
 
 def main_train():
-    name = 'xp_0'     # in all the file 'name' implicitly refers to the name of an experiment
-    root = "/Users/charles/Data/Hamelin/"       # dir containing TRAIN, TST and VAL
+    name = mkexpdir()   # in all the file 'name' implicitly refers to the name of an experiment
+    root = "/home/abrecadabrac/Template/data/Hamelin_full/"       # dir containing TRAIN, TST and VAL
     images_train_dir = root + "TRAIN/train/"
     labels_train_txt = root + "train.txt"
+    images_valid_dir = root + "VAL/valid/"
+    labels_valid_txt = root + "valid.txt"
 
     data = Data(images_train_dir, labels_train_txt)
+
+    validation_set = Data(images_valid_dir, labels_valid_txt)
+    validation_data = validation_set.generator(1000).__next__()   # (x_val, y_val)
+
     net = attention_network_1(data)
 
     nb_data = len(data.labels_dict)     # total number of hand-written images in the train data-set
 
     train_model(net, data, name,
+                validation_data=validation_data,
                 learning_rate=0.001,
                 loss='mean_squared_error',
-                batch_size=1,
-                epoch=1,
-                steps_per_epoch=1)
+                batch_size=8,
+                epoch=50,
+                steps_per_epoch=5)
 
     print('###----> training end <-----###')
 
 
-def main_predict():
-    name = 'xp_1'
-    root = "/Users/charles/Data/Hamelin/"
+
+def main_pred():
+    name = 'xp_2'   # in all the file 'name' implicitly refers to the name of an experiment
+    root = "/home/abrecadabrac/Template/data/Hamelin_full/"       # dir containing TRAIN, TST and VAL
     images_test_dir = root + "TST/test/"
     labels_test_txt = root + "test.txt"
 
     data = Data(images_test_dir, labels_test_txt)
 
-    y = predict(name, data)
+    net = load_xp_model(name)
 
-    print('fin evaluate')
+    y = predict(net, data)
+    y = pred2OneHot(y)
+
+    print('###----> prediction end <-----###')
+
 
 
 if __name__ == "__main__":
-    main_train()
+    main_pred()

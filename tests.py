@@ -2,17 +2,31 @@
 from models.ANN import attention_network_1
 from data.reader import Data
 
+from keras import backend as K
+from keras.layers import Input, Dense, Lambda, ThresholdedReLU
+from keras.models import Model
+
+from Run import main_pred
 
 
-def see_intermidiate_states(net, data):
-    print(' ')
+def create_net():
+    i_ = Input(name='input', shape=(16, 28))
+
+    maxi_ = K.max(i_, axis=2)
+    thri_ = ThresholdedReLU(theta=0.7)(maxi_)
+
+
+    return Model(input=i_, output=thri_)
 
 
 if __name__ == "__main__":
-    data = Data()
-    net = attention_network_1(data)
+    x = main_pred()
 
-    see_intermidiate_states(net, data)
+    net_test = create_net()
+
+    y = net_test.predict(x)
+
+    print('fin du test')
 
 
 

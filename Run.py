@@ -1,5 +1,6 @@
 from models.ANN import attention_network_1
-from data.reader import Data, pred2OneHot
+from data.reader import Data
+from data.vars import Vars
 
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.optimizers import Adam
@@ -10,6 +11,8 @@ import models
 import json
 import os
 
+V = Vars()
+
 
 def train_model(net, data, name,
                 validation_data,
@@ -18,8 +21,8 @@ def train_model(net, data, name,
                 batch_size=1,
                 epoch=1,
                 steps_per_epoch=1):
-
-    tb = TensorBoard(log_dir='./experiments/' + name + '/TensorBoard/', histogram_freq=0, write_graph=True, write_images=True)
+    tb = TensorBoard(log_dir='./experiments/' + name + '/TensorBoard/', histogram_freq=0, write_graph=True,
+                     write_images=True)
     cp = ModelCheckpoint(filepath="./experiments/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5')
 
     net.compile(optimizer=Adam(lr=learning_rate), loss=loss)
@@ -36,11 +39,11 @@ def train_model(net, data, name,
 def mkexpdir():
     while True:
         try:
-            name = input("Enter an experiement name: ")
+            name = input("Enter an experiment name: ")
             os.makedirs("./experiments/" + name + '/weights/')
             break
         except FileExistsError:
-            print('Warning : experiment name %s already used' %name)
+            print('Warning : experiment name %s already used' % name)
 
     return name
 
@@ -74,8 +77,7 @@ def load_xp_model(name):
     file = open(d + '/model.json', 'r')
     net_json = file.read()
     file.close()
-    net = model_from_json(net_json,
-                     custom_objects={'AttentionDecoder': models.custom_recurrents.AttentionDecoder})
+    net = model_from_json(net_json, custom_objects={'AttentionDecoder': models.custom_recurrents.AttentionDecoder})
 
     with open(d + '/meta_parameters.json', 'r') as f:
         meta_parameters = json.load(f)
@@ -87,18 +89,13 @@ def load_xp_model(name):
 
     return net
 
+
 # __________________________________________________ #
-
-
-def predict(net, data, nb_pred=50):
-    images, labels = data.generator(nb_pred).__next__()
-
-    return net.predict(images)
 
 
 def evaluate_model(name, data_test):
     """
-    Function to calculate the loss of the net on the data
+    Function to calculate the loss of the net on the data_test
     return: the loss
     """
     net = load_xp_model(name)
@@ -108,27 +105,19 @@ def evaluate_model(name, data_test):
     return net.evaluate(X, Y)
 
 
-   # # # # # # # # # # #
-# # diposable functions  # #
-   # # # # # # # # # # #
-
+# __________________________________________________ #
 
 def main_train():
-    name = mkexpdir()   # in all the file 'name' implicitly refers to the name of an experiment
-    root = "/home/abrecadabrac/Template/data/Hamelin_full/"       # dir containing TRAIN, TST and VAL
-    images_train_dir = root + "TRAIN/train/"
-    labels_train_txt = root + "train.txt"
-    images_valid_dir = root + "VAL/valid/"
-    labels_valid_txt = root + "valid.txt"
+    name = mkexpdir()  # in all the file 'name' implicitly refers to the name of an experiment
 
-    data = Data(images_train_dir, labels_train_txt)
+    data = Data(V.images_train_dir, V.labels_train_txt)
 
-    validation_set = Data(images_valid_dir, labels_valid_txt)
-    validation_data = validation_set.generator(1000).__next__()   # (x_val, y_val)
+    validation_set = Data(V.images_valid_dir, V.labels_valid_txt)
+    validation_data = validation_set.generator(1000).__next__()  # (x_val, y_val)
 
     net = attention_network_1(data)
 
-    nb_data = len(data.labels_dict)     # total number of hand-written images in the train data-set
+    nb_data = len(data.labels_dict)  # total number of hand-written images in the train data-set
 
     train_model(net, data, name,
                 validation_data=validation_data,
@@ -141,23 +130,23 @@ def main_train():
     print('###----> training end <-----###')
 
 
+def main_prediction():
+    name = 'xp_2'  # in all the file 'name' implicitly refers to the name of an experiment
 
-def main_pred():
-    name = 'xp_2'   # in all the file 'name' implicitly refers to the name of an experiment
-    root = "/home/abrecadabrac/Template/data/Hamelin_full/"       # dir containing TRAIN, TST and VAL
-    images_test_dir = root + "TST/test/"
-    labels_test_txt = root + "test.txt"
-
-    data = Data(images_test_dir, labels_test_txt)
+    data = Data(V.images_test_dir, V.labels_test_txt)
 
     net = load_xp_model(name)
 
-    y = predict(net, data)
-    y = pred2OneHot(y)
+    images, _ = data.generator(50).__next__()
+
+    y = net.predict(images)
+    #y = data.pred2OneHot(y)
+    #y = data.decode_labels(y)
+
+    return y
 
     print('###----> prediction end <-----###')
 
 
-
 if __name__ == "__main__":
-    main_pred()
+    main_prediction()

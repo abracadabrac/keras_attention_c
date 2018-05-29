@@ -278,6 +278,8 @@ class AttentionDecoder(Recurrent):
             + K.dot(context, self.C_o)
             + self.b_o)
 
+        K.max(yt, axis=1, keepdims=False)
+
         if self.return_probabilities:
             return at, [yt, st]
         else:

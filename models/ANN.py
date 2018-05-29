@@ -4,6 +4,10 @@ from data.reader import Data
 from models.custom_recurrents import AttentionDecoder
 import numpy as np
 
+from data.vars import Vars
+
+V = Vars()
+
 
 # A model using the custom layer inspired by https://github.com/datalogue/keras-attention
 def attention_network_1(data):
@@ -18,9 +22,9 @@ def attention_network_1(data):
     p = {  # parameters
         "cc1": 4,  # number of convolution channels 1
         "kmp1": (2, 1),  # kernel max pooling 1
-        "cc2": 8,  # ...
+        "cc2": 16,  # ...
         "kmp2": (3, 2),
-        "cc3": 16,
+        "cc3": 64,
         "kmp3": (4, 2),
         "da": 128,  # attention dimension, internal representation of the attention cell
         "do": data.vocab_size  # dimension of the abstract representation the elements of the sequence
@@ -40,20 +44,14 @@ def attention_network_1(data):
 
     r_ = Reshape(shape_1)(mp_3)
 
-    # Long Short Term Memory ##
-    lstm_1 = Bidirectional(LSTM(16, return_sequences=True, dropout=0.1))(r_)
-    lstm_2 = Bidirectional(LSTM(32, return_sequences=True, dropout=0.1))(lstm_1)
-
-    y_ = (AttentionDecoder(p["da"], p["do"])(lstm_2))
+    y_ = (AttentionDecoder(p["da"], p["do"])(r_))
 
     return Model(inputs=i_, outputs=y_)
 
 
 if __name__ == "__main__":
-    root = "/Users/charles/Data/Hamelin/"
-    images_test_dir = root + "TST/test/"
-    labels_test_txt = root + "test.txt"
-    data = Data(images_test_dir, labels_test_txt)
+
+    data = Data(V.images_test_dir, V.labels_test_txt)
 
     model = attention_network_1(data)
     model.summary()

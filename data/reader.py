@@ -4,6 +4,10 @@ import os
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 
+from data.vars import Vars
+
+V = Vars()
+
 
 def pad_images(images, im_height, im_length):
     padded_images = []
@@ -18,10 +22,16 @@ def pad_images(images, im_height, im_length):
     return padded_images
 
 
+def pad_character(char_list, length):
+    char_list = [xi + '_' * (length - len(xi))
+                 for xi in char_list]
+    return char_list
+
+
 def get_labels_dict(labels_txt_path):
     """
     :param labels_txt_path:
-    :return: a dictionary of corresponce between image files and associated labels
+    :return: a dictionary of corresponce between image files and its associated labels
 
     ex :    { 'NEAT_0-19word12561420170630155102_005_w005.png': 'NICOSIA',
               'NEAT_0-19word12583420170703115206_001_w007.png': 'IDEAS',
@@ -49,32 +59,20 @@ def get_labels_dict(labels_txt_path):
     return labels_dict
 
 
-def pred2OneHot(probability_vector):
-    """
-    Neural nets predict vectors of probability for each element of the sequence over the vocabulary.
-    this function permits to get the most likely label according to the net's prediction
-
-    :param probability_vector:
-    :return: most likely encoded chars
-
-    ex : [ [.2, .3, .5], [.1, .7, .2] ] -> [ [0, 0, 1], [0, 1, 0] ]
-    """
-    print('fin')
-
-
 class Data:
 
-    def __init__(self, images_dir_path, labels_txt_path):
+    def __init__(self, images_dir_path, labels_txt_path, pad_input_char=True):
 
         self.im_height = 28
         self.im_length = 384
         self.lb_length = 16  # normalized length of the encoded elements of the labels
+        self.pad_input_char = pad_input_char
         self.image_dir_path = images_dir_path
         self.labels_txt_path = labels_txt_path
 
         self.labels_dict = get_labels_dict(labels_txt_path)
-        self.encoding_dict = np.load('/home/abrecadabrac/Template/keras_attention_text/data/encoding_dict_Hamelin.npy').item()
-        self.decoding_dict = np.load('/home/abrecadabrac/Template/keras_attention_text/data/decoding_dict_Hamelin.npy').item()
+        self.encoding_dict = np.load(V.encoding_dict).item()
+        self.decoding_dict = np.load(V.decoding_dict).item()
 
         self.images_path = np.array(os.listdir(images_dir_path))
 
@@ -93,11 +91,15 @@ class Data:
 
                 images_batch = np.array(images_batch_list).reshape(batch_size, self.im_length, self.im_height, 1)
 
-                variable_size_words_batch_list = [self.labels_dict[image_path]
-                                                  # list of variable-size non-encoded words
-                                                  for image_path in self.images_path[batch_ids]]
+                words_batch_list = [self.labels_dict[image_path]
+                                    # list of variable-size non-encoded words
+                                    for image_path in self.images_path[batch_ids]]
 
-                labels_batch = self.encode_label(variable_size_words_batch_list)  # encode and normalize size
+                if self.pad_input_char:
+                    # the sequence of character will be padded with '_' which correspond to the last one-hot encoding
+                    words_batch_list = pad_character(words_batch_list, self.lb_length)
+
+                labels_batch = self.encode_label(words_batch_list)  # encode and normalize size
 
                 assert (images_batch.shape == (batch_size, self.im_length, self.im_height, 1)) & \
                        (labels_batch.shape == (batch_size, self.lb_length, self.vocab_size))
@@ -120,6 +122,9 @@ class Data:
         variable_size_encoded_labels_list = [[self.encoding_dict[char]
                                               for char in label] for label in labels]
 
+        # the fallowing portion ensure that the encoded label has a fixed sized by padding it with zero vectors.
+        # If pad_input_char == True the character sequence is already padded with '_' and the label will not contain any zero vector
+        # as it will be padded with the vector corresponding to '_'.
         encoded_labels = np.array(
             [xi + [list(np.zeros(self.vocab_size))] * (self.lb_length - len(xi))
              for xi in variable_size_encoded_labels_list])
@@ -137,18 +142,32 @@ class Data:
             for e in label:
                 if np.sum(e) == 1:
                     decoded_label += self.decoding_dict[list(e).index(1.)]
-                else:
-                    decoded_label += "_"
+
             decoded_labels.append(decoded_label)
         return decoded_labels
 
+    def pred2OneHot(self, probability_vector):
+        """
+        Neural nets predict vectors of probability for each element of the sequence over the vocabulary.
+        this function permits to get the most likely label according to the net's prediction
+
+        :param probability_vector:
+        :return: most likely encoded chars
+
+        ex : [ [.2, .3, .5], [.1, .7, .2] ] -> [ [0, 0, 1], [0, 1, 0] ]
+        """
+
+        M = np.array([list(np.argmax(l, axis=1)) for l in probability_vector])
+        oh = np.zeros([probability_vector.shape[0], probability_vector.shape[1], self.vocab_size])
+        for batch_index, batch_list in enumerate(list(M)):
+            for time_step, index in enumerate(list(batch_list)):
+                oh[batch_index, time_step, index] = 1
+
+        return oh
+
 
 def main1():
-    root = "/home/abrecadabrac/Template/data/Hamelin_full/"
-    images_test_dir = root + "TST/test/"
-    labels_test_txt = root + "test.txt"
-
-    data = Data(images_test_dir, labels_test_txt)
+    data = Data(V.images_test_dir, V.labels_test_txt)
 
     gen = data.generator(12)
     images, labels = gen.__next__()

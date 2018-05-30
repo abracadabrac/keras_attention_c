@@ -67,7 +67,7 @@ def save_experiment(net, name, learning_rate, loss, epoch, steps_per_epoch):
     net.save_weights(d + '/weights.h5')
 
 
-def load_xp_model(name):
+def load_xp_model(name, epoch=None):
     """
     :param name: name of the experiment
     :return: the network fully trained after the last epoch
@@ -85,7 +85,10 @@ def load_xp_model(name):
     loss = meta_parameters['loss']
     net.compile(optimizer=Adam(lr=learning_rate), loss=loss)
 
-    net.load_weights(d + "/weights.h5")
+    if epoch==None:
+        net.load_weights(d + "/weights.h5")
+    else:
+        weights_list = os.listdir("/home/abrecadabrac/Template/keras_attention_text/experiments/xp_3/weights")
 
     return net
 
@@ -124,24 +127,27 @@ def main_train():
                 learning_rate=0.001,
                 loss='mean_squared_error',
                 batch_size=8,
-                epoch=50,
-                steps_per_epoch=5)
+                epoch=5,
+                steps_per_epoch=5000)
 
     print('###----> training end <-----###')
 
 
 def main_prediction():
-    name = 'xp_2'  # in all the file 'name' implicitly refers to the name of an experiment
+    name = 'xp_3'  # in all the file 'name' implicitly refers to the name of an experiment
 
     data = Data(V.images_test_dir, V.labels_test_txt)
 
     net = load_xp_model(name)
 
-    images, _ = data.generator(50).__next__()
+    images, labels = data.generator(50).__next__()
 
     y = net.predict(images)
-    #y = data.pred2OneHot(y)
-    #y = data.decode_labels(y)
+    y = data.pred2OneHot(y)
+    y = data.decode_labels(y)
+
+    print(y)
+    print(data.decode_labels(labels))
 
     return y
 

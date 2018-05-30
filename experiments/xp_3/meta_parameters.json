@@ -1,0 +1,1 @@
+{"loss": "mean_squared_error", "epoch": 5, "steps_per_epoch": 5000, "learning_rate": 0.001}

@@ -174,8 +174,6 @@ def main1():
 
     decoded_labels = data.decode_labels(labels)
 
-    print(decoded_labels)
-
 
 if __name__ == "__main__":
     main1()

@@ -6,7 +6,10 @@ from keras import backend as K
 from keras.layers import Input, Dense, Lambda, ThresholdedReLU
 from keras.models import Model
 
-from Run import main_pred
+from Run import load_xp_model
+from data.reader import Vars
+
+V = Vars()
 
 
 def create_net():
@@ -20,7 +23,11 @@ def create_net():
 
 
 if __name__ == "__main__":
-    x = main_pred()
+    name = 'xp_3'  # in all the file 'name' implicitly refers to the name of an experiment
+    data = Data(V.images_test_dir, V.labels_test_txt)
+    net = load_xp_model(name)
+    images, labels = data.generator(50).__next__()
+    x = net.predict(images)
 
     net_test = create_net()
 

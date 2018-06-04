@@ -17,7 +17,7 @@ V = Vars()
 def train_model(net, data, name,
                 validation_data,
                 learning_rate=0.001,
-                loss='mean_squared_error',
+                loss='categorical_crossentropy',
                 batch_size=1,
                 epoch=1,
                 steps_per_epoch=1):
@@ -89,6 +89,7 @@ def load_xp_model(name, epoch=None):
         net.load_weights(d + "/weights.h5")
     else:
         weights_list = os.listdir("/home/abrecadabrac/Template/keras_attention_text/experiments/xp_3/weights")
+        print("Warning loading epoch function unfinished")
 
     return net
 
@@ -142,14 +143,15 @@ def main_prediction():
 
     images, labels = data.generator(50).__next__()
 
-    y = net.predict(images)
-    y = data.pred2OneHot(y)
-    y = data.decode_labels(y)
+    prediction = net.predict(images)
+    argmax_prediction = data.pred2OneHot(prediction)
+    decoded_prediction = data.decode_labels(argmax_prediction)
 
-    print(y)
+    print(decoded_prediction)
     print(data.decode_labels(labels))
+    print("error 1   ", net.evaluate(images, labels))
 
-    return y
+
 
     print('###----> prediction end <-----###')
 

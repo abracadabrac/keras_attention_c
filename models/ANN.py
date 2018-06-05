@@ -26,7 +26,7 @@ def attention_network_1(data):
         "kmp2": (3, 2),
         "cc3": 64,
         "kmp3": (4, 2),
-        "da": 128,  # attention dimension, internal representation of the attention cell
+        "da": 200,  # attention dimension, internal representation of the attention cell
         "do": data.vocab_size  # dimension of the abstract representation the elements of the sequence
     }
     total_maxpool_kernel = np.product([[p[k][0], p[k][1]] for k in p.keys() if k[:3] == "kmp"], axis=0)
@@ -44,7 +44,7 @@ def attention_network_1(data):
 
     r_ = Reshape(shape_1)(mp_3)
 
-    y_ = (AttentionDecoder(p["da"], p["do"])(r_))
+    y_ = (AttentionDecoder(p["da"], p["do"], name='attention_' + str(p['da']))(r_))
 
     return Model(inputs=i_, outputs=y_)
 

@@ -28,6 +28,23 @@ def pad_character(char_list, length):
     return char_list
 
 
+def depad_character(char_list):
+    """
+    this function permits to remove the '_' at the end of the labels.
+    :param char_list:
+    :return: the character without the '_' at the end
+
+    ex: 'London__________' -> 'London'
+    """
+    for index_char, char in enumerate(char_list):
+        i = len(char)-1
+        while char[i] == '_':
+            char = char[:i]
+            i -= 1
+        char_list[index_char] = char
+    return char_list
+
+
 def get_labels_dict(labels_txt_path):
     """
     :param labels_txt_path:
@@ -131,7 +148,7 @@ class Data:
 
         return encoded_labels
 
-    def decode_labels(self, labels):
+    def decode_labels(self, labels, depad=False):
         """
         :param labels: np.array of list representing a sequence of encoded labels.
         :return: the corresponding list of strings padded with "_" for null elements
@@ -144,6 +161,10 @@ class Data:
                     decoded_label += self.decoding_dict[list(e).index(1.)]
 
             decoded_labels.append(decoded_label)
+
+        if depad:
+            decoded_labels = depad_character(decoded_labels)
+
         return decoded_labels
 
     def pred2OneHot(self, probability_vector):
@@ -173,6 +194,12 @@ def main1():
     images, labels = gen.__next__()
 
     decoded_labels = data.decode_labels(labels)
+
+    print(decoded_labels)
+
+    depaded_labels = depad_character(decoded_labels)
+
+    print(depaded_labels)
 
 
 if __name__ == "__main__":

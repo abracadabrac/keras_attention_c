@@ -5,6 +5,7 @@ from data.vars import Vars
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.optimizers import Adam
 from keras.models import model_from_json
+from utils.CER import CER
 
 import models
 
@@ -21,7 +22,8 @@ def train_model(net, data, name,
                 batch_size=1,
                 epoch=1,
                 steps_per_epoch=1):
-    tb = TensorBoard(log_dir='./experiments/' + name + '/TensorBoard/', histogram_freq=0, write_graph=True,
+
+    tb = TensorBoard(log_dir='./experiments/' + name + '/TensorBoard/', histogram_freq=1, write_graph=True,
                      write_images=True)
     cp = ModelCheckpoint(filepath="./experiments/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5')
 
@@ -33,7 +35,7 @@ def train_model(net, data, name,
                       steps_per_epoch=steps_per_epoch,
                       callbacks=[tb, cp])
 
-    save_experiment(net, name, learning_rate, loss, epoch, steps_per_epoch)
+    save_xp(net, name, learning_rate, loss, epoch, steps_per_epoch)
 
 
 def mkexpdir():
@@ -48,7 +50,7 @@ def mkexpdir():
     return name
 
 
-def save_experiment(net, name, learning_rate, loss, epoch, steps_per_epoch):
+def save_xp(net, name, learning_rate, loss, epoch, steps_per_epoch):
     d = "./experiments/" + name
 
     meta_parameters = {'learning_rate': learning_rate,
@@ -69,6 +71,7 @@ def save_experiment(net, name, learning_rate, loss, epoch, steps_per_epoch):
 
 def load_xp_model(name, epoch=None):
     """
+    :param epoch:
     :param name: name of the experiment
     :return: the network fully trained after the last epoch
     """
@@ -85,7 +88,7 @@ def load_xp_model(name, epoch=None):
     loss = meta_parameters['loss']
     net.compile(optimizer=Adam(lr=learning_rate), loss=loss)
 
-    if epoch==None:
+    if epoch is None:
         net.load_weights(d + "/weights.h5")
     else:
         weights_list = os.listdir("/home/abrecadabrac/Template/keras_attention_text/experiments/xp_3/weights")
@@ -135,21 +138,22 @@ def main_train():
 
 
 def main_prediction():
-    name = 'xp_3'  # in all the file 'name' implicitly refers to the name of an experiment
-
+    name = 'xp_4_cross_entropy'  # in all the file 'name' implicitly refers to the name of an experiment
     data = Data(V.images_test_dir, V.labels_test_txt)
-
     net = load_xp_model(name)
-
     images, labels = data.generator(50).__next__()
+    decoded_label = data.decode_labels(labels, depad=False)
 
     prediction = net.predict(images)
     argmax_prediction = data.pred2OneHot(prediction)
-    decoded_prediction = data.decode_labels(argmax_prediction)
+    decoded_prediction = data.decode_labels(argmax_prediction, depad=False)
 
+    i = 2
     print(decoded_prediction)
-    print(data.decode_labels(labels))
-    print("error 1   ", net.evaluate(images, labels))
+    print(decoded_label)
+    print("error 1   ", net.evaluate(images, labels, verbose=False))
+
+    print("WER", CER(decoded_prediction[i], decoded_label[i]))
 
 
 

@@ -46,14 +46,14 @@ def attention_network_1(data):
 
     y_ = (AttentionDecoder(p["da"], p["do"], name='attention_' + str(p['da']))(r_))
 
-    return Model(inputs=i_, outputs=y_), p
+    return Model(inputs=i_, outputs=y_)
 
 
 if __name__ == "__main__":
 
     data = Data(V.images_test_dir, V.labels_test_txt)
 
-    model, _ = attention_network_1(data)
+    model = attention_network_1(data)
     model.summary()
 
     print('fin')

@@ -11,14 +11,13 @@ implements function to save and load models
 """
 
 
-def save_xp(net, name, parameters, learning_rate, loss, epoch, steps_per_epoch):
+def save_xp(net, name, learning_rate, loss, epoch, steps_per_epoch):
     d = "./experiments/" + name
 
     meta_parameters = {'learning_rate': learning_rate,
                        'loss': loss,
                        'epoch': epoch,
                        'steps_per_epoch': steps_per_epoch}
-    meta_parameters.update(parameters)
     with open(d + '/meta_parameters.json', 'w') as f:
         json.dump(meta_parameters, f)
 
@@ -53,7 +52,6 @@ def load_xp_model(name, epoch=None):
     if epoch is None:
         net.load_weights(d + "/weights.h5")
     else:
-        weights_list = os.listdir("/home/abrecadabrac/Template/keras_attention_text/experiments/xp_3/weights")
         print("Warning loading epoch function unfinished")
 
     return net

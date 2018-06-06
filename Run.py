@@ -1,15 +1,12 @@
 from models.ANN import attention_network_1
 from data.reader import Data
 from data.vars import Vars
+from utils.CER import CER
+from loader import save_xp, load_xp_model
 
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.optimizers import Adam
-from keras.models import model_from_json
-from utils.CER import CER
 
-import models
-
-import json
 import os
 
 V = Vars()
@@ -50,53 +47,6 @@ def mkexpdir():
     return name
 
 
-def save_xp(net, name, learning_rate, loss, epoch, steps_per_epoch):
-    d = "./experiments/" + name
-
-    meta_parameters = {'learning_rate': learning_rate,
-                       'loss': loss,
-                       'epoch': epoch,
-                       'steps_per_epoch': steps_per_epoch}
-    with open(d + '/meta_parameters.json', 'w') as f:
-        json.dump(meta_parameters, f)
-
-    with open(d + "/model.json", "w") as f:
-        f.write(net.to_json())
-
-    with open(d + '/architecture_summary.txt', 'w') as f:
-        net.summary(print_fn=lambda x: f.write(x + '\n'))
-
-    net.save_weights(d + '/weights.h5')
-
-
-def load_xp_model(name, epoch=None):
-    """
-    :param epoch:
-    :param name: name of the experiment
-    :return: the network fully trained after the last epoch
-    """
-    d = 'experiments/' + name
-
-    file = open(d + '/model.json', 'r')
-    net_json = file.read()
-    file.close()
-    net = model_from_json(net_json, custom_objects={'AttentionDecoder': models.custom_recurrents.AttentionDecoder})
-
-    with open(d + '/meta_parameters.json', 'r') as f:
-        meta_parameters = json.load(f)
-    learning_rate = meta_parameters['learning_rate']
-    loss = meta_parameters['loss']
-    net.compile(optimizer=Adam(lr=learning_rate), loss=loss)
-
-    if epoch is None:
-        net.load_weights(d + "/weights.h5")
-    else:
-        weights_list = os.listdir("/home/abrecadabrac/Template/keras_attention_text/experiments/xp_3/weights")
-        print("Warning loading epoch function unfinished")
-
-    return net
-
-
 # __________________________________________________ #
 
 
@@ -114,7 +64,7 @@ def evaluate_model(name, data_test):
 
 # __________________________________________________ #
 
-def main_train():
+def main_training():
     name = mkexpdir()  # in all the file 'name' implicitly refers to the name of an experiment
 
     data = Data(V.images_train_dir, V.labels_train_txt)
@@ -131,8 +81,8 @@ def main_train():
                 learning_rate=0.001,
                 loss='mean_squared_error',
                 batch_size=8,
-                epoch=5,
-                steps_per_epoch=5000)
+                epoch=50,
+                steps_per_epoch=10000)
 
     print('###----> training end <-----###')
 
@@ -161,4 +111,4 @@ def main_prediction():
 
 
 if __name__ == "__main__":
-    main_prediction()
+    main_training()

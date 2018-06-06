@@ -2,7 +2,7 @@ from keras.models import model_from_json
 from keras.optimizers import Adam
 import json
 
-import models
+from models.custom_recurrents import AttentionDecoder
 
 import os
 
@@ -11,13 +11,14 @@ implements function to save and load models
 """
 
 
-def save_xp(net, name, learning_rate, loss, epoch, steps_per_epoch):
+def save_xp(net, name, parameters, learning_rate, loss, epoch, steps_per_epoch):
     d = "./experiments/" + name
 
     meta_parameters = {'learning_rate': learning_rate,
                        'loss': loss,
                        'epoch': epoch,
                        'steps_per_epoch': steps_per_epoch}
+    meta_parameters.update(parameters)
     with open(d + '/meta_parameters.json', 'w') as f:
         json.dump(meta_parameters, f)
 
@@ -41,7 +42,7 @@ def load_xp_model(name, epoch=None):
     file = open(d + '/model.json', 'r')
     net_json = file.read()
     file.close()
-    net = model_from_json(net_json, custom_objects={'AttentionDecoder': models.custom_recurrents.AttentionDecoder})
+    net = model_from_json(net_json, custom_objects={'AttentionDecoder': AttentionDecoder})
 
     with open(d + '/meta_parameters.json', 'r') as f:
         meta_parameters = json.load(f)

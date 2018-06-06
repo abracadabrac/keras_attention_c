@@ -42,18 +42,18 @@ def attention_network_1(data):
     shape_1 = (int(data.im_length / total_maxpool_kernel[0]),
                int(data.im_height / total_maxpool_kernel[1]) * p["cc3"])
 
-    r_ = Reshape(shape_1)(mp_3)
+    r_ = Reshape(shape_1, name="collapse")(mp_3)
 
     y_ = (AttentionDecoder(p["da"], p["do"], name='attention_' + str(p['da']))(r_))
 
-    return Model(inputs=i_, outputs=y_)
+    return Model(inputs=i_, outputs=y_), p
 
 
 if __name__ == "__main__":
 
     data = Data(V.images_test_dir, V.labels_test_txt)
 
-    model = attention_network_1(data)
+    model, _ = attention_network_1(data)
     model.summary()
 
     print('fin')

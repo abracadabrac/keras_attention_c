@@ -12,7 +12,7 @@ import os
 V = Vars()
 
 
-def train_model(net, data, name,
+def train_model(net, data, name, parameters,
                 validation_data,
                 learning_rate=0.001,
                 loss='categorical_crossentropy',
@@ -32,7 +32,7 @@ def train_model(net, data, name,
                       steps_per_epoch=steps_per_epoch,
                       callbacks=[tb, cp])
 
-    save_xp(net, name, learning_rate, loss, epoch, steps_per_epoch)
+    save_xp(net, name, parameters, learning_rate, loss, epoch, steps_per_epoch)
 
 
 def mkexpdir():
@@ -72,17 +72,17 @@ def main_training():
     validation_set = Data(V.images_valid_dir, V.labels_valid_txt)
     validation_data = validation_set.generator(1000).__next__()  # (x_val, y_val)
 
-    net = attention_network_1(data)
+    net, parameters = attention_network_1(data)
 
     nb_data = len(data.labels_dict)  # total number of hand-written images in the train data-set
 
-    train_model(net, data, name,
+    train_model(net, data, name, parameters,
                 validation_data=validation_data,
                 learning_rate=0.001,
                 loss='categorical_crossentropy',
                 batch_size=8,
                 epoch=50,
-                steps_per_epoch=10000)
+                steps_per_epoch=10)
 
     print('###----> training end <-----###')
 

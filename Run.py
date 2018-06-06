@@ -79,7 +79,7 @@ def main_training():
     train_model(net, data, name,
                 validation_data=validation_data,
                 learning_rate=0.001,
-                loss='mean_squared_error',
+                loss='categorical_crossentropy',
                 batch_size=8,
                 epoch=50,
                 steps_per_epoch=10000)

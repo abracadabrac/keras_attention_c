@@ -25,7 +25,9 @@ def attention_network_1(data):
         "cc2": 16,  # ...
         "kmp2": (3, 2),
         "cc3": 64,
-        "kmp3": (4, 2),
+        "kmp3": (3, 2),
+        "cc4": 128,
+        "kmp4": (1, 1),
         "da": 200,  # attention dimension, internal representation of the attention cell
         "do": data.vocab_size  # dimension of the abstract representation the elements of the sequence
     }
@@ -38,11 +40,13 @@ def attention_network_1(data):
     mp_2 = MaxPooling2D(pool_size=p["kmp2"])(c_2)
     c_3 = Conv2D(p["cc3"], (3, 3), padding="same")(mp_2)
     mp_3 = MaxPooling2D(pool_size=p["kmp3"])(c_3)
+    c_4 = Conv2D(p["cc4"], (3, 3), padding="same")(mp_3)
+    mp_4 = MaxPooling2D(pool_size=p["kmp4"])(c_4)
 
     shape_1 = (int(data.im_length / total_maxpool_kernel[0]),
-               int(data.im_height / total_maxpool_kernel[1]) * p["cc3"])
+               int(data.im_height / total_maxpool_kernel[1]) * p["cc4"])
 
-    r_ = Reshape(shape_1, name="collapse")(mp_3)
+    r_ = Reshape(shape_1, name="collapse")(mp_4)
 
     y_ = (AttentionDecoder(p["da"], p["do"], name='attention_' + str(p['da']))(r_))
 

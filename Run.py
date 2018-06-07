@@ -4,6 +4,7 @@ from data.vars import Vars
 from utils.CER import CER
 from loader import save_xp, load_xp_model
 
+import datetime
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.optimizers import Adam
 
@@ -36,13 +37,15 @@ def train_model(net, data, name,
 
 
 def mkexpdir():
-    while True:
-        try:
-            name = input("Enter an experiment name: ")
-            os.makedirs("./experiments/" + name + '/weights/')
-            break
-        except FileExistsError:
-            print('Warning : experiment name %s already used' % name)
+
+    now = datetime.datetime.now().replace(microsecond=0)
+    name = datetime.date.today().isoformat() + '-' + datetime.time.isoformat(now.time())
+    os.makedirs("./experiments/" + name + '/weights/')
+
+    comment = input("Enter (on not) a comment :     ")
+    with open("./experiments/" + name + "/comment.txt", "w") as f:
+        f.write('   # init xp')
+        f.write(comment)
 
     return name
 

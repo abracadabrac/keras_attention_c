@@ -82,7 +82,7 @@ class Data:
 
         self.im_height = 28
         self.im_length = 384
-        self.lb_length = 16  # normalized length of the encoded elements of the labels
+        self.lb_length = 21  # normalized length of the encoded elements of the labels
         self.pad_input_char = pad_input_char
         self.image_dir_path = images_dir_path
         self.labels_txt_path = labels_txt_path

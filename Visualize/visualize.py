@@ -70,6 +70,10 @@ def see_maps(name):
                               blit=True)
     plt.show()
 
+    k = 0
+    list_images_att[k]
+    plt.show()
+
 def main_see_attention_maps():
     name = 'xp_5'
 

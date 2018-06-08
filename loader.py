@@ -4,10 +4,8 @@ import json
 
 from models.custom_recurrents import AttentionDecoder
 
-import os
-
 """
-implements function to save and load models
+implements functions to save and load models
 """
 
 
@@ -27,7 +25,6 @@ def save_xp(net, name, learning_rate, loss, epoch, steps_per_epoch):
     with open(d + '/architecture_summary.txt', 'w') as f:
         net.summary(print_fn=lambda x: f.write(x + '\n'))
 
-    net.save_weights(d + '/weights.h5')
 
 
 def load_xp_model(name, epoch=None):

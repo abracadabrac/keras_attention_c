@@ -21,19 +21,21 @@ def train_model(net, data, name,
                 epoch=1,
                 steps_per_epoch=1):
 
-    tb = TensorBoard(log_dir='./experiments/' + name + '/TensorBoard/', histogram_freq=1, write_graph=True,
+    tb = TensorBoard(log_dir='./experiments/' + name + '/TensorBoard/',
+                     histogram_freq=1,
+                     write_graph=True,
                      write_images=True)
     cp = ModelCheckpoint(filepath="./experiments/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5')
 
     net.compile(optimizer=Adam(lr=learning_rate), loss=loss)
 
+    save_xp(net, name, learning_rate, loss, epoch, steps_per_epoch)
     net.fit_generator(data.generator(batch_size),
                       epochs=epoch,
                       validation_data=validation_data,
                       steps_per_epoch=steps_per_epoch,
                       callbacks=[tb, cp])
-
-    save_xp(net, name, learning_rate, loss, epoch, steps_per_epoch)
+    net.save_weights("./experiments/" + name + '/weights.h5')
 
 
 def mkexpdir():
@@ -42,7 +44,7 @@ def mkexpdir():
     name = datetime.date.today().isoformat() + '-' + datetime.time.isoformat(now.time())
     os.makedirs("./experiments/" + name + '/weights/')
 
-    comment = input("Enter (on not) a comment :     ")
+    comment = input("Enter (or not) a comment :     ")
     with open("./experiments/" + name + "/comment.txt", "w") as f:
         f.write('   # init xp')
         f.write(comment)
@@ -73,7 +75,7 @@ def main_training():
     data = Data(V.images_train_dir, V.labels_train_txt)
 
     validation_set = Data(V.images_valid_dir, V.labels_valid_txt)
-    validation_data = validation_set.generator(1000).__next__()  # (x_val, y_val)
+    validation_data = validation_set.generator(4000).__next__()  # (x_val, y_val)
 
     net = attention_network_1(data)
 
@@ -85,7 +87,7 @@ def main_training():
                 loss='categorical_crossentropy',
                 batch_size=8,
                 epoch=50,
-                steps_per_epoch=10)
+                steps_per_epoch=1638)
 
     print('###----> training end <-----###')
 

@@ -24,11 +24,11 @@ def attention_network_1(data):
         "kmp1": (2, 1),  # kernel max pooling 1
         "cc2": 16,  # ...
         "kmp2": (3, 2),
-        "cc3": 64,
+        "cc3": 16,
         "kmp3": (3, 2),
-        "cc4": 128,
+        "cc4": 16,
         "kmp4": (1, 1),
-        "da": 200,  # attention dimension, internal representation of the attention cell
+        "da": 32,  # attention dimension, internal representation of the attention cell
         "do": data.vocab_size  # dimension of the abstract representation the elements of the sequence
     }
     total_maxpool_kernel = np.product([[p[k][0], p[k][1]] for k in p.keys() if k[:3] == "kmp"], axis=0)

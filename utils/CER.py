@@ -1,7 +1,8 @@
+import numpy
+
 def CER(r, h):
 
-# initialisation
-    import numpy
+    # initialisation
     d = numpy.zeros((len(r)+1)*(len(h)+1), dtype=numpy.uint8)
     d = d.reshape((len(r)+1, len(h)+1))
     for i in range(len(r)+1):
@@ -22,5 +23,4 @@ def CER(r, h):
                 deletion     = d[i-1][j] + 1
                 d[i][j] = min(substitution, insertion, deletion)
 
-    return d[len(r)][len(h)]
-
+    return d[len(r)][len(h)] / len(r)

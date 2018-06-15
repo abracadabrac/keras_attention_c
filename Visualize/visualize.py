@@ -2,7 +2,8 @@ from loader import load_xp_model
 from keras import Model
 import json
 import numpy as np
-import matplotlib.pyplot as plt
+from matplotlib.pyplot import imshow, show, figure
+
 import matplotlib.animation as animation
 
 from models.custom_recurrents import AttentionDecoder
@@ -29,9 +30,7 @@ def create_net_attention_maps(net, name):
     r_ = net.get_layer("collapse").output
     a_ = (AttentionDecoder(units, output_dim, name='attention_visualizer', return_probabilities=True)(r_))
 
-    net = Model(inputs=i_,
-                outputs=a_)
-
+    net = Model(inputs=i_, outputs=a_)
     net.load_weights(d + "/weights.h5")
 
     return net
@@ -53,29 +52,22 @@ def see_maps(name):
     pred = preds[im_index]
     att = atts[im_index, :, :, 0]
 
+    ratio = image.shape[0] / att.shape[0]
     list_images_att = []
-    for i in range(att.shape[0]):
-        a = att[i]
-
+    for a in att:
+        image_att = np.copy(image)
         for x in range(image.shape[0]):
-            ratio = image.shape[0] / att.shape[0]
-            image_att = image
-            image_att[x, :] = image[x, :] * a[int(x / ratio)]
-            list_images_att.append(plt.imshow(np.rot90(image_att, k=1)))
+            image_att[x, :] = image_att[x, :] * a[int(x / ratio)]
 
-    fig = plt.figure()
-    animation.ArtistAnimation(fig, list_images_att,
-                              interval=50,
-                              repeat_delay=3000,
-                              blit=True)
-    plt.show()
+        list_images_att.append([imshow(np.rot90(image_att, k=1), animated=True)])
+    list_images_att.append([imshow(np.rot90(np.zeros((384, 28)), k=1), animated=True)])
 
-    k = 0
-    list_images_att[k]
-    plt.show()
+    fig = figure()
+    ani = animation.ArtistAnimation(fig, list_images_att, interval=200, blit=True, repeat_delay=6e5)
+    show()
 
 def main_see_attention_maps():
-    name = 'xp_5'
+    name = '2018-06-11-12:49:30'
 
     see_maps(name)
 

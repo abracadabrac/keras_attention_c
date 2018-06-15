@@ -24,7 +24,7 @@ def train_model(net, data, name,
     tb = TensorBoard(log_dir='./experiments/' + name + '/TensorBoard/',
                      histogram_freq=1,
                      write_graph=True,
-                     write_images=True)
+                     write_images=False)
     cp = ModelCheckpoint(filepath="./experiments/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5')
 
     net.compile(optimizer=Adam(lr=learning_rate), loss=loss)
@@ -44,7 +44,7 @@ def mkexpdir():
     name = datetime.date.today().isoformat() + '-' + datetime.time.isoformat(now.time())
     os.makedirs("./experiments/" + name + '/weights/')
 
-    comment = input("Enter (or not) a comment :     ")
+    comment = input("Enter (or not) a comment: ")
     with open("./experiments/" + name + "/comment.txt", "w") as f:
         f.write('   # init xp')
         f.write(comment)
@@ -86,22 +86,22 @@ def main_training():
                 learning_rate=0.001,
                 loss='categorical_crossentropy',
                 batch_size=8,
-                epoch=50,
+                epoch=6,
                 steps_per_epoch=1638)
 
     print('###----> training end <-----###')
 
 
 def main_prediction():
-    name = 'xp_4_cross_entropy'  # in all the file 'name' implicitly refers to the name of an experiment
+    name = '2018-06-11-12:49:30'  # in all the file 'name' implicitly refers to the name of an experiment
     data = Data(V.images_test_dir, V.labels_test_txt)
     net = load_xp_model(name)
     images, labels = data.generator(50).__next__()
-    decoded_label = data.decode_labels(labels, depad=False)
+    decoded_label = data.decode_labels(labels, depad=True)
 
     prediction = net.predict(images)
     argmax_prediction = data.pred2OneHot(prediction)
-    decoded_prediction = data.decode_labels(argmax_prediction, depad=False)
+    decoded_prediction = data.decode_labels(argmax_prediction, depad=True)
 
     i = 2
     print(decoded_prediction)
@@ -116,4 +116,4 @@ def main_prediction():
 
 
 if __name__ == "__main__":
-    main_training()
+    main_prediction()

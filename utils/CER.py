@@ -23,4 +23,4 @@ def CER(r, h):
                 deletion     = d[i-1][j] + 1
                 d[i][j] = min(substitution, insertion, deletion)
 
-    return d[len(r)][len(h)] / len(r)
+    return d[len(r)][len(h)]

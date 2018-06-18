@@ -123,9 +123,9 @@ class Data:
 
                 yield (images_batch, labels_batch)
             except Exception as e:
-                print(" ")
-                print('OULALA !!')
-                print(e)
+                #print(" ")
+                #print('OULALA !!')
+                #print(e)
                 self.generator(batch_size)
 
     def encode_label(self, labels):

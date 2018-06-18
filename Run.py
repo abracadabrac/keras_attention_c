@@ -41,6 +41,7 @@ def train_model(net, data, name,
 
 
 def test_model(net, name):
+    print(' ------ testing ------')
     os.makedirs('experiments/' + name + '/Test/')
 
     data = Data(V.images_test_dir, V.labels_test_txt)
@@ -68,34 +69,31 @@ def test_model(net, name):
         fieldnames = ['name', 'value']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerow({'name': 'cross validation', 'value': cross_val})
+        writer.writerow({'name': 'cross-entropie', 'value': cross_val})
         writer.writerow({'name': 'label error', 'value': label_error})
 
-def mkexpdir():
-    now = datetime.datetime.now().replace(microsecond=0)
-    name = datetime.date.today().isoformat() + '-' + datetime.time.isoformat(now.time())
-    os.makedirs("./experiments/" + name + '/weights/')
 
-    comment = input("Enter (or not) a comment: ")
-    with open("./experiments/" + name + "/comment.txt", "w") as f:
-        f.write('   # init xp')
-        f.write(comment)
-
-    return name
-
-
-
-def main_training():
-    name = mkexpdir()  # in all the file 'name' implicitly refers to the name of an experiment
+def main_training(args):
 
     data = Data(V.images_train_dir, V.labels_train_txt)
 
     validation_set = Data(V.images_valid_dir, V.labels_valid_txt)
     validation_data = validation_set.generator(4000).__next__()  # (x_val, y_val)
 
-    net = attention_network_1(data)
+    if args.name is None:
+        net = load_xp_model(args.name)
+        name = args.name + '-'
+    else:
+        net = attention_network_1(data)
+        now = datetime.datetime.now().replace(microsecond=0)
+        name = datetime.date.today().isoformat() + '-' + datetime.time.isoformat(now.time())
 
-    nb_data = len(data.labels_dict)  # total number of hand-written images in the train data-set
+    os.makedirs("./experiments/" + name + '/weights/')
+
+    comment = input("Enter (or not) a comment: ")
+    with open("./experiments/" + name + "/comment.txt", "w") as f:
+        f.write('   # init xp')
+        f.write(comment)
 
     train_model(net, data, name,
                 validation_data=validation_data,
@@ -105,11 +103,21 @@ def main_training():
                 epoch=6,
                 steps_per_epoch=1638)
 
+    test_model(net, name)
+
     print('###----> training %s completed <-----###' % name)
 
 
-
-
 if __name__ == "__main__":
-    net = load_xp_model('2018-06-11-12:49:30')
-    test_model(net, '2018-06-11-12:49:30')
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    named_args = parser.add_argument_group('named arguments')
+
+    named_args.add_argument('-n', '--name', metavar='|',
+                            help="""name of the experiment""",
+                            required=False, default=None, type=str)
+
+    args = parser.parse_args()
+
+    main_training(args)

@@ -81,12 +81,13 @@ def main_training(args):
     validation_data = validation_set.generator(4000).__next__()  # (x_val, y_val)
 
     if args.name is None:
-        net = load_xp_model(args.name)
-        name = args.name + '-'
-    else:
         net = attention_network_1(data)
         now = datetime.datetime.now().replace(microsecond=0)
         name = datetime.date.today().isoformat() + '-' + datetime.time.isoformat(now.time())
+    else:
+
+        net = load_xp_model(args.name)
+        name = args.name + '-'
 
     os.makedirs("./experiments/" + name + '/weights/')
 

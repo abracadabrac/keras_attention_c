@@ -1,4 +1,4 @@
-from models.ANN import attention_network_1
+from models.ANN import attention_network_1, standardlstm_network
 from data.reader import Data
 from data.vars import Vars
 from loader import save_xp, load_xp_model
@@ -81,11 +81,10 @@ def main_training(args):
     validation_data = validation_set.generator(4000).__next__()  # (x_val, y_val)
 
     if args.name is None:
-        net = attention_network_1(data)
+        net = standardlstm_network(data)
         now = datetime.datetime.now().replace(microsecond=0)
         name = datetime.date.today().isoformat() + '-' + datetime.time.isoformat(now.time())
     else:
-
         net = load_xp_model(args.name)
         name = args.name + '-'
 

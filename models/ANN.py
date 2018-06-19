@@ -48,7 +48,17 @@ def attention_network_1(data):
 
     r_ = Reshape(shape_1, name="collapse")(mp_4)
 
-    y_ = (AttentionDecoder(p["da"], p["do"], name='attention_' + str(p['da']))(r_))
+    lstm_ = Bidirectional(LSTM(p["do"], return_sequences=True), name="LSTM0")(r_)
+
+    shape_2 = (int(data.im_length / total_maxpool_kernel[0]),
+               p["do"] * 2, 1)
+    r_2 = Reshape(shape_2)(lstm_)
+    mp_5 = MaxPooling2D(pool_size=(1, 2))(r_2)
+    shape_3 = (int(data.im_length / total_maxpool_kernel[0]),
+               p["do"])
+    r_3 = Reshape(shape_3)(mp_5)
+
+    y_ = (AttentionDecoder(p["da"], p["do"], name='attention_' + str(p['da']))(r_3))
 
     return Model(inputs=i_, outputs=y_)
 
@@ -108,7 +118,7 @@ if __name__ == "__main__":
 
     data = Data(V.images_test_dir, V.labels_test_txt)
 
-    model = standard_lstm(data)
+    model = attention_network_1(data)
     model.summary()
 
     print('fin')

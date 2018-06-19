@@ -73,24 +73,23 @@ def test_model(net, name):
         writer.writerow({'name': 'label error', 'value': label_error})
 
 
-def main_training(args):
+def main_training():
 
     data = Data(V.images_train_dir, V.labels_train_txt)
 
     validation_set = Data(V.images_valid_dir, V.labels_valid_txt)
     validation_data = validation_set.generator(4000).__next__()  # (x_val, y_val)
 
-    if args.name is None:
-        net = standardlstm_network(data)
-        now = datetime.datetime.now().replace(microsecond=0)
-        name = datetime.date.today().isoformat() + '-' + datetime.time.isoformat(now.time())
-    else:
-        net = load_xp_model(args.name)
-        name = args.name + '-'
+
+    net = standardlstm_network(data)
+    now = datetime.datetime.now().replace(microsecond=0)
+    name = datetime.date.today().isoformat() + '-' + datetime.time.isoformat(now.time())
 
     os.makedirs("./experiments/" + name + '/weights/')
 
-    comment = input("Enter (or not) a comment: ")
+    #comment = input("Enter (or not) a comment: ")
+
+    comment = 'lstm model for comparison'
     with open("./experiments/" + name + "/comment.txt", "w") as f:
         f.write('   # init xp')
         f.write(comment)
@@ -100,12 +99,37 @@ def main_training(args):
                 learning_rate=0.001,
                 loss='categorical_crossentropy',
                 batch_size=8,
-                epoch=6,
+                epoch=60,
                 steps_per_epoch=1638)
 
     test_model(net, name)
 
-    print('###----> training %s completed <-----###' % name)
+
+    # ______---------_______ #
+
+    net = attention_network_1(data)
+    now = datetime.datetime.now().replace(microsecond=0)
+    name = datetime.date.today().isoformat() + '-' + datetime.time.isoformat(now.time())
+
+    os.makedirs("./experiments/" + name + '/weights/')
+
+    # comment = input("Enter (or not) a comment: ")
+
+    comment = 'lstm + attention'
+    with open("./experiments/" + name + "/comment.txt", "w") as f:
+        f.write('   # init xp')
+        f.write(comment)
+
+    train_model(net, data, name,
+                validation_data=validation_data,
+                learning_rate=0.001,
+                loss='categorical_crossentropy',
+                batch_size=8,
+                epoch=60,
+                steps_per_epoch=1638)
+
+    test_model(net, name)
+
 
 
 if __name__ == "__main__":
@@ -120,4 +144,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main_training(args)
+    main_training()

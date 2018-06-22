@@ -81,41 +81,14 @@ def main_training():
     validation_data = validation_set.generator(4000).__next__()  # (x_val, y_val)
 
 
-    net = standardlstm_network(data)
-    now = datetime.datetime.now().replace(microsecond=0)
-    name = datetime.date.today().isoformat() + '-' + datetime.time.isoformat(now.time())
-
-    os.makedirs("./experiments/" + name + '/weights/')
-
-    #comment = input("Enter (or not) a comment: ")
-
-    comment = 'lstm model for comparison'
-    with open("./experiments/" + name + "/comment.txt", "w") as f:
-        f.write('   # init xp')
-        f.write(comment)
-
-    train_model(net, data, name,
-                validation_data=validation_data,
-                learning_rate=0.001,
-                loss='categorical_crossentropy',
-                batch_size=8,
-                epoch=60,
-                steps_per_epoch=1638)
-
-    test_model(net, name)
-
-
-    # ______---------_______ #
-
     net = attention_network_1(data)
     now = datetime.datetime.now().replace(microsecond=0)
-    name = datetime.date.today().isoformat() + '-' + datetime.time.isoformat(now.time())
+    name = datetime.date.today().isoformat() + '/' + now.strftime("%H-%M-%S")
 
     os.makedirs("./experiments/" + name + '/weights/')
 
-    # comment = input("Enter (or not) a comment: ")
+    comment = input("Enter (or not) a comment: ")
 
-    comment = 'lstm + attention'
     with open("./experiments/" + name + "/comment.txt", "w") as f:
         f.write('   # init xp')
         f.write(comment)
@@ -129,6 +102,7 @@ def main_training():
                 steps_per_epoch=1638)
 
     test_model(net, name)
+
 
 
 

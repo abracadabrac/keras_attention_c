@@ -63,11 +63,18 @@ def see_maps(name):
     list_images_att.append([imshow(np.rot90(np.zeros((384, 28)), k=1), animated=True)])
 
     fig = figure()
-    ani = animation.ArtistAnimation(fig, list_images_att, interval=200, blit=True, repeat_delay=6e5)
+    ani = animation.ArtistAnimation(fig, list_images_att, interval=800, blit=True, repeat_delay=6e5)
     show()
 
+
+def main_annimation():
+    name = '2018-06-18-18:29:09'
+
+    see_maps(name)
+
+
 def main_see_attention_maps():
-    name = '2018-06-11-12:49:30'
+    name = '2018-06-18-18:29:09'
 
     see_maps(name)
 

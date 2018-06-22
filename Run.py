@@ -98,7 +98,7 @@ def main_training():
                 learning_rate=0.001,
                 loss='categorical_crossentropy',
                 batch_size=8,
-                epoch=60,
+                epoch=70,
                 steps_per_epoch=1638)
 
     test_model(net, name)

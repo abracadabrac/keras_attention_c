@@ -1,4 +1,4 @@
-from models.ANN import attention_network_1, standardlstm_network
+from models.ANN import attention_network_1, attention_network_2
 from data.reader import Data
 from data.vars import Vars
 from loader import save_xp, load_xp_model
@@ -73,21 +73,16 @@ def test_model(net, name):
         writer.writerow({'name': 'label error', 'value': label_error})
 
 
-def main_training():
-
-    data = Data(V.images_train_dir, V.labels_train_txt)
+def main_training(net, data, comment=''):
 
     validation_set = Data(V.images_valid_dir, V.labels_valid_txt)
     validation_data = validation_set.generator(4000).__next__()  # (x_val, y_val)
 
 
-    net = attention_network_1(data)
     now = datetime.datetime.now().replace(microsecond=0)
     name = datetime.date.today().isoformat() + '/' + now.strftime("%H-%M-%S")
-
     os.makedirs("./experiments/" + name + '/weights/')
-
-    comment = input("Enter (or not) a comment: ")
+    #comment = input("Enter (or not) a comment: ")
 
     with open("./experiments/" + name + "/comment.txt", "w") as f:
         f.write('   # init xp')
@@ -118,4 +113,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main_training()
+
+
+    data = Data(V.images_train_dir, V.labels_train_txt)
+
+    net = attention_network_2(data)
+    main_training(net, data)
+
+    net = attention_network_1(data)
+    main_training(net, data)
+
+

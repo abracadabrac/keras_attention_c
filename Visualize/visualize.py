@@ -17,6 +17,11 @@ os.chdir('..')
 
 
 def create_net_attention_maps(net, name):
+    """
+    :param net:
+    :param name:
+    :return: the same net which outputs the attention maps instead of the labels
+    """
     d = "./experiments/" + name
 
     with open(d + '/model.json', 'r') as f:
@@ -36,7 +41,7 @@ def create_net_attention_maps(net, name):
     return net
 
 
-def see_maps(name):
+def see_animation(name):
     data = Data(V.images_train_dir, V.labels_train_txt)
 
     net = load_xp_model(name)
@@ -67,17 +72,3 @@ def see_maps(name):
     show()
 
 
-def main_annimation():
-    name = '2018-06-18-18:29:09'
-
-    see_maps(name)
-
-
-def main_see_attention_maps():
-    name = '2018-06-18-18:29:09'
-
-    see_maps(name)
-
-
-if __name__ == '__main__':
-    main_see_attention_maps()

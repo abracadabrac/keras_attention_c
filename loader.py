@@ -46,7 +46,10 @@ def load_xp_model(name, epoch=None):
     loss = meta_parameters['loss']
     net.compile(optimizer=Adam(lr=learning_rate), loss=loss)
 
+
+    print(d + "/weights.h5")
     if epoch is None:
+        print(d + "/weights.h5")
         net.load_weights(d + "/weights.h5")
     else:
         print("Warning loading epoch function unfinished")

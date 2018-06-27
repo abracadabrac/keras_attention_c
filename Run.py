@@ -27,7 +27,7 @@ def train_model(net, data, name,
                      histogram_freq=1,
                      write_graph=True,
                      write_images=False)
-    cp = ModelCheckpoint(filepath="./experiments/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5')
+    cp = ModelCheckpoint(filepath="./experiments/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5', save_best_only=True)
 
     net.compile(optimizer=Adam(lr=learning_rate), loss=loss)
 
@@ -80,12 +80,12 @@ def main_training(net, data, comment=''):
 
 
     now = datetime.datetime.now().replace(microsecond=0)
-    name = datetime.date.today().isoformat() + '/' + now.strftime("%H-%M-%S")
+    name = datetime.date.today().isoformat() + '-' + now.strftime("%H-%M-%S")
     os.makedirs("./experiments/" + name + '/weights/')
     #comment = input("Enter (or not) a comment: ")
 
     with open("./experiments/" + name + "/comment.txt", "w") as f:
-        f.write('   # init xp')
+        f.write('   # init 2018-06-18-18:29:09')
         f.write(comment)
 
     train_model(net, data, name,

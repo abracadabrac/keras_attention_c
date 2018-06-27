@@ -2,6 +2,7 @@ from loader import load_xp_model
 from keras import Model
 import json
 import numpy as np
+import cv2
 from matplotlib.pyplot import imshow, show, figure
 
 import matplotlib.animation as animation
@@ -27,13 +28,15 @@ def create_net_attention_maps(net, name):
     with open(d + '/model.json', 'r') as f:
         params = json.load(f)
 
-    params_attention = params['config']['layers'][-1]['config']
-    units = params_attention['units']
-    output_dim = params_attention['output_dim']
+    layers = params['config']['layers']
+    config_attention = layers[-1]['config']
+    units_attention = config_attention['units']
+    output_dim = config_attention['output_dim']
+    last_layer_name = layers[-2]['name']
 
     i_ = net.input
-    r_ = net.get_layer("collapse").output
-    a_ = (AttentionDecoder(units, output_dim, name='attention_visualizer', return_probabilities=True)(r_))
+    r_ = net.get_layer(last_layer_name).output
+    a_ = (AttentionDecoder(units_attention, output_dim, name='attention_visualizer', return_probabilities=True)(r_))
 
     net = Model(inputs=i_, outputs=a_)
     net.load_weights(d + "/weights.h5")
@@ -72,3 +75,30 @@ def see_animation(name):
     show()
 
 
+def maps(name):
+    data = Data(V.images_train_dir, V.labels_train_txt)
+
+    net = load_xp_model(name)
+    net_attention = create_net_attention_maps(net, name)
+
+    images, labels = data.generator(10).__next__()
+
+    preds = data.decode_labels(data.pred2OneHot(net.predict(images)))
+    atts = net_attention.predict(images)
+
+    panel = np.zeros((35, 35, 3), dtype=np.int)
+    att = atts[0, :, :, 0]
+
+    x = 4
+    y = 2
+    panel[x:x + att.shape[0], y:y + att.shape[1], 1] = att * 255 / np.max(att)
+
+    cv2.imwrite('panel.jpg', panel)
+    os.open('panel.jpg')
+
+    print('fin')
+
+
+if __name__ == "__main__":
+    name = "2018-06-26-12-06-33"
+    maps(name)

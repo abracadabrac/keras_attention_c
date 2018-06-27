@@ -27,7 +27,9 @@ def train_model(net, data, name,
                      histogram_freq=1,
                      write_graph=True,
                      write_images=False)
-    cp = ModelCheckpoint(filepath="./experiments/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5', save_best_only=True)
+    cp = ModelCheckpoint(filepath="./experiments/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5', 
+                         save_best_only=True, 
+                         monitor='val_loss')
 
     net.compile(optimizer=Adam(lr=learning_rate), loss=loss)
 

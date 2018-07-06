@@ -1,4 +1,4 @@
-from keras.layers import Dense, Input, Conv2D, merge, MaxPooling2D, Reshape, RepeatVector, Flatten, Permute, LSTM, Bidirectional
+from keras.layers import Dense, Input, Conv2D, merge, MaxPooling2D, Reshape, RepeatVector, Flatten, Permute, LSTM, Bidirectional, Activation
 from keras.models import Model
 from data.reader import Data
 from models.custom_recurrents import AttentionDecoder
@@ -32,13 +32,13 @@ def attention_network_1(data):
     total_maxpool_kernel = np.product([[p[k][0], p[k][1]] for k in p.keys() if k[:3] == "kmp"], axis=0)
 
     # Convolutions ##
-    conv1_ = Conv2D(p["cc1"], (3, 3), padding="same")(i_)
+    conv1_ = Conv2D(p["cc1"], (3, 3), padding="same", activation = Activation('tanh'))(i_)
     mp1_ = MaxPooling2D(pool_size=p["kmp1"])(conv1_)
-    conv2_ = Conv2D(p["cc2"], (3, 3), padding="same")(mp1_)
+    conv2_ = Conv2D(p["cc2"], (3, 3), padding="same", activation = Activation('tanh'))(mp1_)
     mp2_ = MaxPooling2D(pool_size=p["kmp2"])(conv2_)
-    conv3_ = Conv2D(p["cc3"], (3, 3), padding="same")(mp2_)
+    conv3_ = Conv2D(p["cc3"], (3, 3), padding="same", activation = Activation('tanh'))(mp2_)
     mp3_ = MaxPooling2D(pool_size=p["kmp3"])(conv3_)
-    conv4_ = Conv2D(p["cc4"], (3, 3), padding="same")(mp3_)
+    conv4_ = Conv2D(p["cc4"], (3, 3), padding="same", activation = Activation('tanh'))(mp3_)
     mp4_ = MaxPooling2D(pool_size=p["kmp4"])(conv4_)
 
     shape1 = (int(data.im_length / total_maxpool_kernel[0]),
@@ -76,13 +76,13 @@ def attention_network_2(data):
     total_maxpool_kernel = np.product([[p[k][0], p[k][1]] for k in p.keys() if k[:3] == "kmp"], axis=0)
 
     # Convolutions ##
-    conv1_ = Conv2D(p["cc1"], (3, 3), padding="same")(i_)
+    conv1_ = Conv2D(p["cc1"], (3, 3), padding="same", activation = Activation('tanh'))(i_)
     mp1_ = MaxPooling2D(pool_size=p["kmp1"])(conv1_)
-    conv2_ = Conv2D(p["cc2"], (3, 3), padding="same")(mp1_)
+    conv2_ = Conv2D(p["cc2"], (3, 3), padding="same", activation = Activation('tanh'))(mp1_)
     mp2_ = MaxPooling2D(pool_size=p["kmp2"])(conv2_)
-    conv3_ = Conv2D(p["cc3"], (3, 3), padding="same")(mp2_)
+    conv3_ = Conv2D(p["cc3"], (3, 3), padding="same", activation = Activation('tanh'))(mp2_)
     mp3_ = MaxPooling2D(pool_size=p["kmp3"])(conv3_)
-    conv4_ = Conv2D(p["cc4"], (3, 3), padding="same")(mp3_)
+    conv4_ = Conv2D(p["cc4"], (3, 3), padding="same", activation = Activation('tanh'))(mp3_)
     mp4_ = MaxPooling2D(pool_size=p["kmp4"])(conv4_)
 
     shape1 = (int(data.im_length / total_maxpool_kernel[0]),
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     data = Data(V.images_test_dir, V.labels_test_txt)
 
-    model = attention_network_1(data)
+    model = attention_network_2(data)
     model.summary()
 
     print('fin')

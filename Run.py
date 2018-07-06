@@ -27,7 +27,10 @@ def train_model(net, data, name,
                      histogram_freq=1,
                      write_graph=True,
                      write_images=False)
-    cp = ModelCheckpoint(filepath="./experiments/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5', save_best_only=True)
+    cp = ModelCheckpoint(filepath="./experiments/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5',
+                         save_best_only=True,
+                         monitor='val_loss',
+                         save_weights_only=True)
 
     net.compile(optimizer=Adam(lr=learning_rate), loss=loss)
 
@@ -93,8 +96,8 @@ def main_training(net, data, comment=''):
                 learning_rate=0.001,
                 loss='categorical_crossentropy',
                 batch_size=8,
-                epoch=70,
-                steps_per_epoch=1638)
+                epoch=14,
+                steps_per_epoch=800)
 
     test_model(net, name)
 

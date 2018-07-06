@@ -4,6 +4,7 @@ import json
 import numpy as np
 import cv2
 from matplotlib.pyplot import imshow, show, figure
+import scipy
 
 import matplotlib.animation as animation
 
@@ -92,13 +93,13 @@ def maps(name):
     x = 4
     y = 2
     panel[x:x + att.shape[0], y:y + att.shape[1], 1] = att * 255 / np.max(att)
+    panel = cv2.resize(panel, (500, 500))
 
-    cv2.imwrite('panel.jpg', panel)
-    os.open('panel.jpg')
+    cv2.imwrite('experiments/' + name + '/panel.jpg', panel)
 
     print('fin')
 
 
 if __name__ == "__main__":
-    name = "2018-06-26-12-06-33"
+    name = "2018-06-29-15-46-30"
     maps(name)

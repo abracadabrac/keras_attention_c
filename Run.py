@@ -123,7 +123,3 @@ if __name__ == "__main__":
     net = attention_network_2(data)
     main_training(net, data)
 
-    net = attention_network_1(data)
-    main_training(net, data)
-
-

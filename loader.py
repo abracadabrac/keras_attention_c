@@ -2,6 +2,8 @@ from keras.models import model_from_json
 from keras.optimizers import Adam
 import json
 
+import os
+
 from models.custom_recurrents import AttentionDecoder
 
 """
@@ -27,7 +29,7 @@ def save_xp(net, name, learning_rate, loss, epoch, steps_per_epoch):
 
 
 
-def load_xp_model(name, epoch=None):
+def load_xp_model(name):
     """
     :param epoch: the index of the training epoch at which loading the net
     :param name: name of the experiment
@@ -46,12 +48,13 @@ def load_xp_model(name, epoch=None):
     loss = meta_parameters['loss']
     net.compile(optimizer=Adam(lr=learning_rate), loss=loss)
 
+    weights = os.listdir(d + '/weights')
+    weights.sort()
 
-    print(d + "/weights.h5")
-    if epoch is None:
-        print(d + "/weights.h5")
-        net.load_weights(d + "/weights.h5")
-    else:
-        print("Warning loading epoch function unfinished")
+    net.load_weights(weights[-1])
 
     return net
+
+
+if __name__ == '__main__':
+    net = load_xp_model('2018-07-10-16-37-16', epoch=1)

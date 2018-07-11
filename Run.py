@@ -88,7 +88,7 @@ def main_training(net, data, comment=''):
     #comment = input("Enter (or not) a comment: ")
 
     with open("./experiments/" + name + "/comment.txt", "w") as f:
-        f.write('   # init 2018-06-18-18:29:09')
+        f.write('   # init ')
         f.write(comment)
 
     train_model(net, data, name,
@@ -96,12 +96,10 @@ def main_training(net, data, comment=''):
                 learning_rate=0.001,
                 loss='categorical_crossentropy',
                 batch_size=8,
-                epoch=70,
-                steps_per_epoch=1638)
-
+                epoch=22,
+                steps_per_epoch=10000)
+    net = load_xp_model(name)
     test_model(net, name)
-
-
 
 
 if __name__ == "__main__":
@@ -122,8 +120,4 @@ if __name__ == "__main__":
 
     net = attention_network_2(data)
     main_training(net, data)
-
-    net = attention_network_1(data)
-    main_training(net, data)
-
 

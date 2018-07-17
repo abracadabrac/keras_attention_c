@@ -45,41 +45,13 @@ def depad_character(char_list):
     return char_list
 
 
-def get_labels_dict(labels_txt_path):
-    """
-    :param labels_txt_path:
-    :return: a dictionary of corresponce between image files and its associated labels
-
-    ex :    { 'NEAT_0-19word12561420170630155102_005_w005.png': 'NICOSIA',
-              'NEAT_0-19word12583420170703115206_001_w007.png': 'IDEAS',
-              'NEAT_0-19word12534620170629153942_005_w008.png': 'WRITINGS', ... }
-    """
-    labels_dict = {}
-    txt = open(labels_txt_path).read()  # text contenant les labels et les noms des fichiers images
-    n_index = [i for i, x in enumerate(txt) if x == "\n"]  # indices des retours a la ligne das le text
-
-    line = txt[0:n_index[0]]
-
-    for i in range(len(n_index) - 1):
-        s = line.index(' ')
-        t = line.index('/')
-        labels_dict[line[t + 1:s]] = line[s + 1:]
-
-        d = n_index[i] + 1
-        f = n_index[i + 1]
-        line = txt[d:f]
-
-    s = line.index(' ')
-    t = line.index('/')
-    labels_dict[line[t + 1:s]] = line[s + 1:]
-
-    return labels_dict
 
 
 class Data:
 
     def __init__(self, images_dir_path, labels_txt_path, pad_input_char=True):
 
+        self.lexic = []
         self.im_height = 28
         self.im_length = 384
         self.lb_length = 21  # normalized length of the encoded elements of the labels
@@ -87,13 +59,50 @@ class Data:
         self.image_dir_path = images_dir_path
         self.labels_txt_path = labels_txt_path
 
-        self.labels_dict = get_labels_dict(labels_txt_path)
+        self.labels_dict = self.get_labels_dict(labels_txt_path)
         self.encoding_dict = np.load(V.encoding_dict).item()
         self.decoding_dict = np.load(V.decoding_dict).item()
 
         self.images_path = np.array(os.listdir(images_dir_path))
 
         self.vocab_size = len(self.encoding_dict)  # total numbers of different characters within the vocabulary, (28)
+
+
+    def get_labels_dict(self, labels_txt_path):
+        """
+        :param labels_txt_path:
+        :return: a dictionary of corresponce between image files and its associated labels
+
+        ex :    { 'NEAT_0-19word12561420170630155102_005_w005.png': 'NICOSIA',
+                  'NEAT_0-19word12583420170703115206_001_w007.png': 'IDEAS',
+                  'NEAT_0-19word12534620170629153942_005_w008.png': 'WRITINGS', ... }
+        """
+        labels_dict = {}
+        txt = open(labels_txt_path).read()  # text contenant les labels et les noms des fichiers images
+        n_index = [i for i, x in enumerate(txt) if x == "\n"]  # indices des retours a la ligne das le text
+
+        line = txt[0:n_index[0]]
+
+        for i in range(len(n_index) - 1):
+            s = line.index(' ')
+            t = line.index('/')
+            word = line[s + 1:]
+
+            labels_dict[line[t + 1:s]] = word
+
+            if word not in self.lexic:
+                self.lexic.append(word)
+
+            d = n_index[i] + 1
+            f = n_index[i + 1]
+            line = txt[d:f]
+
+        s = line.index(' ')
+        t = line.index('/')
+        labels_dict[line[t + 1:s]] = line[s + 1:]
+
+        return labels_dict
+
 
     def generator(self, batch_size):
         instance_id = range(len(self.images_path))
@@ -188,18 +197,8 @@ class Data:
 
 
 def main1():
-    data = Data(V.images_test_dir, V.labels_test_txt)
-
-    gen = data.generator(12)
-    images, labels = gen.__next__()
-
-    decoded_labels = data.decode_labels(labels)
-
-    print(decoded_labels)
-
-    depaded_labels = depad_character(decoded_labels)
-
-    print(depaded_labels)
+    train = Data(V.images_train_dir, V.labels_train_txt)
+    test = Data(V.images_test_dir, V.labels_test_txt)
 
 
 if __name__ == "__main__":

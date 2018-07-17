@@ -40,7 +40,6 @@ def train_model(net, data, name,
                       validation_data=validation_data,
                       steps_per_epoch=steps_per_epoch,
                       callbacks=[tb, cp])
-    net.save_weights("./experiments/" + name + '/weights.h5')
 
 
 def test_model(net, name):
@@ -56,24 +55,27 @@ def test_model(net, name):
     decoded_prediction = data.decode_labels(argmax_prediction, depad=True)
 
     with open('experiments/' + name + '/Test/predictions.csv', 'w') as f:
-        fieldnames = ['label', 'prediction']
+        fieldnames = ['label', 'prediction', 'error']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
 
         writer.writeheader()
 
         for l, p in zip(decoded_label, decoded_prediction):
-            writer.writerow({'label': l, 'prediction': p})
+            writer.writerow({'label': l, 'prediction': p, 'error': CER(l, p)})
 
     cross_val = net.evaluate(images, labels, verbose=False)
     label_error = [CER(l, p) for l, p in zip(decoded_label, decoded_prediction)]
-    label_error = np.sum(label_error) / len(label_error)
+    label_error_mean = np.sum(label_error) / len(label_error)
+    word_error = [0 if cer == 0 else 1 for cer in label_error]
+    word_error_mean = np.mean(word_error)
 
     with open('experiments/' + name + '/Test/loss.csv', 'w') as f:
         fieldnames = ['name', 'value']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerow({'name': 'cross-entropie', 'value': cross_val})
-        writer.writerow({'name': 'label error', 'value': label_error})
+        writer.writerow({'name': 'label error', 'value': label_error_mean})
+        writer.writerow({'name': 'word error', 'value': word_error_mean})
 
 
 def main_training(net, data, comment=''):

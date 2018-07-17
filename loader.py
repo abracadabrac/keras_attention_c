@@ -51,10 +51,10 @@ def load_xp_model(name):
     weights = os.listdir(d + '/weights')
     weights.sort()
 
-    net.load_weights(weights[-1])
+    net.load_weights(d + '/weights/' + weights[-1])
 
     return net
 
 
 if __name__ == '__main__':
-    net = load_xp_model('2018-07-10-16-37-16', epoch=1)
+    net = load_xp_model('2018-07-10-16-37-16')

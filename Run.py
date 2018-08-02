@@ -4,7 +4,6 @@ from data.vars import Vars
 from loader import save_xp, load_xp_model
 from utils.CER import CER
 
-
 import datetime
 from keras.callbacks import TensorBoard, ModelCheckpoint
 from keras.optimizers import Adam
@@ -44,7 +43,7 @@ def train_model(net, data, name,
 
 def test_model(net, name):
     print(' ------ testing ------')
-    os.makedirs('experiments/' + name + '/Test/')
+    os.makedirs(V.experiments_folder + "/keras/" + name + '/Test/')
 
     data = Data(V.images_test_dir, V.labels_test_txt)
     images, labels = data.generator(4450).__next__()
@@ -54,7 +53,7 @@ def test_model(net, name):
     argmax_prediction = data.pred2OneHot(prediction)
     decoded_prediction = data.decode_labels(argmax_prediction, depad=True)
 
-    with open('experiments/' + name + '/Test/predictions.csv', 'w') as f:
+    with open(V.experiments_folder + "/keras/" + name + '/Test/predictions.csv', 'w') as f:
         fieldnames = ['label', 'prediction', 'error']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
 
@@ -69,7 +68,7 @@ def test_model(net, name):
     word_error = [0 if cer == 0 else 1 for cer in label_error]
     word_error_mean = np.mean(word_error)
 
-    with open('experiments/' + name + '/Test/loss.csv', 'w') as f:
+    with open(V.experiments_folder + "/keras/" + name + '/Test/loss.csv', 'w') as f:
         fieldnames = ['name', 'value']
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -86,10 +85,10 @@ def main_training(net, data, comment=''):
 
     now = datetime.datetime.now().replace(microsecond=0)
     name = datetime.date.today().isoformat() + '-' + now.strftime("%H-%M-%S")
-    os.makedirs("./experiments/" + name + '/weights/')
+    os.makedirs(V.experiments_folder + "/keras/" + name + '/weights/')
     #comment = input("Enter (or not) a comment: ")
 
-    with open("./experiments/" + name + "/comment.txt", "w") as f:
+    with open(V.experiments_folder + "/keras/" + name + "/comment.txt", "w") as f:
         f.write('   # init ')
         f.write(comment)
 
@@ -115,8 +114,6 @@ if __name__ == "__main__":
                             required=False, default=None, type=str)
 
     args = parser.parse_args()
-
-
 
     data = Data(V.images_train_dir, V.labels_train_txt)
 

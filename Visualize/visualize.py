@@ -14,7 +14,7 @@ from data.vars import Vars
 
 import os
 
-V = Vars()
+V = Vars(open('../../vars.json', 'r'))
 os.chdir('..')
 
 

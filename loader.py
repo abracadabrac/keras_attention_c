@@ -1,10 +1,13 @@
 from keras.models import model_from_json
 from keras.optimizers import Adam
 import json
-
 import os
 
 from models.custom_recurrents import AttentionDecoder
+
+from data.vars import Vars
+
+V = Vars()
 
 """
 implements functions to save and load models
@@ -12,7 +15,7 @@ implements functions to save and load models
 
 
 def save_xp(net, name, learning_rate, loss, epoch, steps_per_epoch):
-    d = "./experiments/" + name
+    d = V.experiments_folder + "/keras/" + name
 
     meta_parameters = {'learning_rate': learning_rate,
                        'loss': loss,
@@ -35,7 +38,7 @@ def load_xp_model(name):
     :param name: name of the experiment
     :return: the network fully trained after the selected epoch, if epoch is None the function will charge the last one
     """
-    d = 'experiments/' + name
+    d = V.experiments_folder + "/keras/" + name
 
     file = open(d + '/model.json', 'r')
     net_json = file.read()

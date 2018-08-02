@@ -1,4 +1,4 @@
-from models.ANN import attention_network_1, attention_network_2
+import models.ANN as model
 from data.reader import Data
 from data.vars import Vars
 from loader import save_xp, load_xp_model
@@ -120,6 +120,6 @@ if __name__ == "__main__":
 
     data = Data(V.images_train_dir, V.labels_train_txt)
 
-    net = attention_network_2(data)
+    net = model.attention_network(data)
     main_training(net, data)
 

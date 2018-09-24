@@ -45,8 +45,6 @@ def depad_character(char_list):
     return char_list
 
 
-
-
 class Data:
 
     def __init__(self, images_dir_path, labels_txt_path, pad_input_char=True):
@@ -108,18 +106,27 @@ class Data:
         instance_id = range(len(self.images_path))
         while True:
             try:
-                batch_ids = random.sample(instance_id, batch_size)  # list of random ids
+                if batch_size <= len(images_path):
+                    batch_ids = random.sample(range(len(images_path)), batch_size)  # list of random ids
+                else:
+                    batch_ids = random.sample(range(len(images_path)), len(images_path))
+                    batch_size = len(images_path)
+
+                images_path_batch = [images_path[id_] for id_ in batch_ids]  # list of random image paths
+                images_path = [image_path for id_, image_path in enumerate(images_path) if id_ not in batch_ids]
+                # we remove the images in the current list not to use the same image twice
 
                 variable_size_images_batch_list = [mpimg.imread(  # images to be padded
-                    self.image_dir_path + self.images_path[id_])
-                    for id_ in batch_ids]
+                    self.image_dir_path + image_path_batch)
+                    for image_path_batch in images_path_batch]
+
                 images_batch_list = pad_images(variable_size_images_batch_list, self.im_height, self.im_length)
 
                 images_batch = np.array(images_batch_list).reshape(batch_size, self.im_length, self.im_height, 1)
 
                 words_batch_list = [self.labels_dict[image_path]
                                     # list of variable-size non-encoded words
-                                    for image_path in self.images_path[batch_ids]]
+                                    for image_path in images_path_batch]
 
                 if self.pad_input_char:
                     # the sequence of character will be padded with '_' which correspond to the last one-hot encoding
@@ -127,8 +134,9 @@ class Data:
 
                 labels_batch = self.encode_label(words_batch_list)  # encode and normalize size
 
-                assert (images_batch.shape == (batch_size, self.im_length, self.im_height, 1)) & \
-                       (labels_batch.shape == (batch_size, self.lb_length, self.vocab_size))
+                if batch_size > 0:
+                    assert (images_batch.shape == (batch_size, self.im_length, self.im_height, 1)) & \
+                           (labels_batch.shape == (batch_size, self.lb_length, self.vocab_size))
 
                 yield (images_batch, labels_batch)
             except Exception as e:

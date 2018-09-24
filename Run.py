@@ -22,11 +22,11 @@ def train_model(net, data, name,
                 batch_size=1,
                 epoch=1,
                 steps_per_epoch=1):
-    tb = TensorBoard(log_dir='./experiments/' + name + '/TensorBoard/',
+    tb = TensorBoard(log_dir=V.experiments_folder + "/keras/" + name + '/TensorBoard/',
                      histogram_freq=1,
                      write_graph=True,
                      write_images=False)
-    cp = ModelCheckpoint(filepath="./experiments/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5',
+    cp = ModelCheckpoint(filepath=V.experiments_folder + "/keras/" + name + '/weights/w.{epoch:02d}-{val_loss:.2f}.hdf5',
                          save_best_only=True,
                          monitor='val_loss',
                          save_weights_only=True)
@@ -77,11 +77,13 @@ def test_model(net, name):
         writer.writerow({'name': 'word error', 'value': word_error_mean})
 
 
-def main_training(net, data, comment=''):
+def main_training(comment=''):
+
+    data = Data(V.images_train_dir, V.labels_train_txt)
+    net = model.attention_network(data)
 
     validation_set = Data(V.images_valid_dir, V.labels_valid_txt)
     validation_data = validation_set.generator(4000).__next__()  # (x_val, y_val)
-
 
     now = datetime.datetime.now().replace(microsecond=0)
     name = datetime.date.today().isoformat() + '-' + now.strftime("%H-%M-%S")
@@ -115,8 +117,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    data = Data(V.images_train_dir, V.labels_train_txt)
-
-    net = model.attention_network(data)
-    main_training(net, data)
+    main_training()
 
